@@ -30,6 +30,7 @@
             background-color: #333;
             padding: 15px;
             position: relative;
+            flex-wrap: wrap;
         }
 
         nav ul {
@@ -38,6 +39,7 @@
             margin: 0;
             display: flex;
             gap: 20px;
+            flex-wrap: wrap;
         }
 
         nav ul li {
@@ -112,6 +114,9 @@
         }
 
         .news-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+            gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
@@ -143,6 +148,29 @@
             text-align: center;
             width: 100%;
         }
+
+        /* Media Queries for Responsiveness */
+        @media screen and (max-width: 768px) {
+            nav ul {
+                flex-direction: column; /* Stack menu items vertically on smaller screens */
+                gap: 10px;
+            }
+            .news-item {
+                padding: 10px; /* Reduce padding for smaller screens */
+            }
+            .manage-account-btn {
+                font-size: 14px; /* Adjust button size for smaller devices */
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .manage-account-btn {
+                top: 5px;
+                right: 10px;
+                font-size: 12px; /* Adjust button size for extra small devices */
+            }
+        }
+
     </style>
 </head>
 
@@ -182,51 +210,12 @@
             <div class="news-item">
                 <h3>News Title 3</h3>
                 <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
-                <div class="news-item">
-                    <h3>News Title 1</h3>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris
-                        fringilla eget.</p>
-                </div>
-                <div class="news-item">
-                    <h3>News Title 2</h3>
-                    <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin
-                        auctor erat non nisi vulputate.</p>
-                </div>
-                <div class="news-item">
-                    <h3>News Title 3</h3>
-                    <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
-                    <div class="news-item">
-                        <h3>News Title 1</h3>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris
-                            fringilla eget.</p>
-                    </div>
-                    <div class="news-item">
-                        <h3>News Title 2</h3>
-                        <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin
-                            auctor erat non nisi vulputate.</p>
-                    </div>
-                    <div class="news-item">
-                        <h3>News Title 3</h3>
-                        <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
-                        <div class="news-item">
-                            <h3>News Title 1</h3>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris
-                                fringilla eget.</p>
-                        </div>
-                        <div class="news-item">
-                            <h3>News Title 2</h3>
-                            <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin
-                                auctor erat non nisi vulputate.</p>
-                        </div>
-                        <div class="news-item">
-                            <h3>News Title 3</h3>
-                            <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
             </div>
         </div>
     </section>
 
     <footer>
-        <p>&copy; 2024 Raxovik Inc. All coppights reserved.</p>
+        <p>&copy; 2024 Raxovik Inc. All copyrights reserved.</p>
     </footer>
 
     <!-- Firebase SDK -->
