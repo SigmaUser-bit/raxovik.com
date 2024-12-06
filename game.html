@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        header {
+            background-color: #4CAF50;
+            padding: 20px;
+            width: 100%;
+            color: white;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .game-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 0;
+        }
+        
+        .game-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+            width: 150px;
+            cursor: pointer;
+        }
+        
+        .game-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .game-image {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        
+        .iframe-container {
+            position: relative;
+            width: 80%;
+            height: 60vh;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: none;
+            /* Initially hide the iframe container */
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 5px;
+        }
+        
+        .full-screen-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            z-index: 1;
+        }
+        
+        .back-button {
+            display: none;
+            /* Initially hide the back button */
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        Welcome to Game Hub
+    </header>
+
+    <div class="game-list" id="game-list">
+        <div class="game-item" onclick="loadGame('https://narrow.one/', 'Game 1')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 1">
+            <p>Narrow one</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://venge.io/', 'Game 2')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 2">
+            <p>venge.io</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://ncase.me/trust/', 'Game 3')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 3">
+            <p>trust</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2023/q2/geometry-dash-freezenova/index.html', 'Game 4')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 4">
+            <p>freezenova</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2021/2/galactic-sniper/index.html', 'Game 5')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 5">
+            <p>galactic-sniper</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2023/construct/200/snake-football/index.html', 'Game 6')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 6">
+            <p>snake-football</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2021/unity2/war-simulator/index.html', 'Game 7')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 7">
+            <p>war-simulator</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2021/unity/stack-fire-ball/index.html', 'Game 8')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 8">
+            <p>stack-fire-ball</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/volley-random', 'Game 9')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 9">
+            <p>volley-random</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2023/construct/280/head-soccer-2022/index.html', 'Game 10')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 10">
+            <p>head-soccer-2022</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2023/unity/real-flight-simulator/index.html', 'Game 11')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 11">
+            <p>real-flight-simulator</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.onlinegames.io/games/2021/3/love-tester/index.html', 'Game 12')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 12">
+            <p>love-tester</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://krunker.io/?game=SIN:zgoip', 'Game 13')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 13">
+            <p>krunker.io</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://neal.fun/perfect-circle/', 'Game 14')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 14">
+            <p>perfect-circle</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/tag-2-3-4-players', 'Game 15')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 15">
+            <p>tag-2-3-4-players</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/shellshockersio', 'Game 16')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 16">
+            <p>shellshockersio</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/escaping-the-prison', 'Game 17')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 17">
+            <p>escaping-the-prison</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/basket-random', 'Game 18')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 18">
+            <p>basket-random</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/stealing-the-diamond', 'Game 19')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 19">
+            <p>stealing-the-diamond</p>
+        </div>
+        <div class="game-item" onclick="loadGame('https://www.crazygames.com/embed/infiltrating-the-airship', 'Game 20')">
+            <img class="game-image" src="https://via.placeholder.com/150" alt="Game 20">
+            <p>infiltrating-the-airship</p>
+        </div>
+    </div>
+
+    <!-- Game container with full screen and back buttons -->
+    <div id="game-container" class="iframe-container">
+        <iframe id="game-frame" src="" title="Game"></iframe>
+        <button id="full-screen-btn" class="full-screen-button" onclick="toggleFullScreen()">Full Screen</button>
+        <button id="back-btn" class="back-button" onclick="goBack()">Back</button>
+    </div>
+
+    <script>
+        function loadGame(url, title) {
+            const gameContainer = document.getElementById('game-container');
+            const gameFrame = document.getElementById('game-frame');
+            const fullScreenBtn = document.getElementById('full-screen-btn');
+            const backBtn = document.getElementById('back-btn');
+
+            gameFrame.src = url;
+            gameContainer.style.display = 'block';
+            document.querySelector('.game-list').style.display = 'none'; // Hide game list
+
+            fullScreenBtn.style.display = 'block'; // Show full screen button
+            backBtn.style.display = 'block'; // Show back button
+        }
+
+        function goBack() {
+            const gameContainer = document.getElementById('game-container');
+            const backBtn = document.getElementById('back-btn');
+            const fullScreenBtn = document.getElementById('full-screen-btn');
+            const gameFrame = document.getElementById('game-frame');
+
+            // Stop the game audio by resetting the iframe's content
+            gameFrame.src = ''; // Clears the iframe content to stop any playing media
+
+            gameContainer.style.display = 'none'; // Hide the iframe container
+            document.querySelector('.game-list').style.display = 'flex'; // Show the game list
+
+            backBtn.style.display = 'none'; // Hide back button
+            fullScreenBtn.style.display = 'none'; // Hide full screen button
+        }
+
+        function toggleFullScreen() {
+            const gameContainer = document.getElementById('game-container');
+            if (!document.fullscreenElement) {
+                gameContainer.requestFullscreen().catch(err => {
+                    console.error("Error trying to enter fullscreen: ", err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+
+</html>

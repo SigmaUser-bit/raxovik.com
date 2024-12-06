@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Sharing App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-container,
+    .video-container {
+      display: none;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    input,
+    button,
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #videoPostsContainer {
+      overflow-y: auto;
+      max-height: 400px;
+      padding-right: 15px;
+    }
+
+    .video-post {
+      margin-bottom: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-height: 150px;
+    }
+
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .post-author {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .post-time {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .post-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      color: #333;
+      text-align: left;
+    }
+
+    .thumbnail {
+      width: 160%;
+      max-height: 500px;
+      height: auto;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background-color: red;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .filter-btns {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filter-btns button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .filter-btns button:hover {
+      background-color: #218838;
+    }
+
+    #refreshBtn {
+      display: none; /* Hidden by default, will show when random filter is applied */
+      background-color: #17a2b8;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    #refreshBtn:hover {
+      background-color: #138496;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="authContainer" class="auth-container">
+      <h1>Login to Share Videos</h1>
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="loginBtn">Login</button>
+      <button id="googleSignInBtn">Login with Google</button>
+      <div id="authError"></div>
+    </div>
+
+    <div id="videoContainer" class="video-container">
+      <h1>Share a Video</h1>
+      <textarea id="videoDescription" placeholder="Enter a description for your video"></textarea>
+      <input type="text" id="videoUrl" placeholder="Enter YouTube video URL" />
+      <button id="uploadBtn">Upload Video</button>
+      <button id="logoutBtn">Log Out</button>
+
+      <!-- Filter buttons -->
+      <div class="filter-btns">
+        <button id="randomBtn">Random</button>
+        <button id="oldestBtn">Oldest</button>
+        <button id="latestBtn">Latest</button>
+      </div>
+
+      <!-- Refresh Button (appears after clicking Random) -->
+      <button id="refreshBtn">Refresh Order</button>
+
+      <div id="videoPostsContainer"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+      authDomain: "signin-320c9.firebaseapp.com",
+      projectId: "signin-320c9",
+      storageBucket: "signin-320c9.appspot.com",
+      messagingSenderId: "1090838062436",
+      appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const authContainer = document.getElementById("authContainer");
+    const videoContainer = document.getElementById("videoContainer");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("loginBtn");
+    const googleSignInBtn = document.getElementById("googleSignInBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const videoDescriptionInput = document.getElementById("videoDescription");
+    const videoUrlInput = document.getElementById("videoUrl");
+    const videoPostsContainer = document.getElementById("videoPostsContainer");
+
+    const randomBtn = document.getElementById("randomBtn");
+    const oldestBtn = document.getElementById("oldestBtn");
+    const latestBtn = document.getElementById("latestBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    let currentUser = null;
+    let posts = [];
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        authContainer.style.display = "none";
+        videoContainer.style.display = "block";
+        loadVideoPosts();
+      } else {
+        currentUser = null;
+        authContainer.style.display = "block";
+        videoContainer.style.display = "none";
+      }
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    googleSignInBtn.addEventListener("click", async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+    });
+
+    uploadBtn.addEventListener("click", async () => {
+      const description = videoDescriptionInput.value.trim();
+      const videoUrl = videoUrlInput.value.trim();
+
+      if (!description || !videoUrl) {
+        alert("Please provide both a description and a video URL.");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "videoPosts"), {
+          description,
+          videoUrl,
+          createdAt: serverTimestamp(),
+          userId: currentUser.uid,
+          author: currentUser.email.split("@")[0],
+        });
+
+        videoDescriptionInput.value = '';
+        videoUrlInput.value = '';
+      } catch (error) {
+        alert("Error uploading video: " + error.message);
+      }
+    });
+
+    function loadVideoPosts() {
+      onSnapshot(collection(db, "videoPosts"), (snapshot) => {
+        posts = [];
+        snapshot.forEach(doc => {
+          const post = doc.data();
+          const videoId = extractVideoIdFromUrl(post.videoUrl);
+          const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+
+          const createdAt = post.createdAt.toDate();
+          const timeAgo = timeElapsed(createdAt);
+
+          posts.push({
+            id: doc.id,
+            author: post.author,
+            description: post.description,
+            videoUrl: post.videoUrl,
+            createdAt,
+            timeAgo,
+            thumbnailUrl,
+          });
+        });
+
+        renderPosts(posts);
+      });
+    }
+
+    function renderPosts(postsArray) {
+      videoPostsContainer.innerHTML = "";
+      postsArray.forEach(post => {
+        const postElement = document.createElement("div");
+        postElement.className = "video-post";
+        postElement.innerHTML = `
+          <div class="post-header">
+            <div class="post-author">${post.author}</div>
+            <div class="post-time">${post.timeAgo}</div>
+          </div>
+          <div class="post-title">${post.description}</div>
+          <a href="${post.videoUrl}" target="_blank" class="thumbnail-link">
+            <img class="thumbnail" src="${post.thumbnailUrl}" alt="Video Thumbnail" />
+          </a>
+        `;
+        videoPostsContainer.appendChild(postElement);
+      });
+    }
+
+    function extractVideoIdFromUrl(url) {
+      const videoId = url.split("v=")[1];
+      return videoId.split("&")[0];
+    }
+
+    function timeElapsed(createdAt) {
+      const diffInMs = Date.now() - createdAt.getTime();
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      const diffInDays = Math.floor(diffInHours / 24);
+
+      if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+      if (diffInHours < 24) return `${diffInHours} hours ago`;
+      return `${diffInDays} days ago`;
+    }
+
+    randomBtn.addEventListener("click", () => {
+      shufflePosts();
+      refreshBtn.style.display = "inline-block";
+    });
+
+    oldestBtn.addEventListener("click", () => {
+      posts.sort((a, b) => a.createdAt - b.createdAt);
+      renderPosts(posts);
+      refreshBtn.style.display = "none";
+    });
+
+    latestBtn.addEventListener("click", () => {
+      posts.sort((a, b) => b.createdAt - a.createdAt);
+      renderPosts(posts);
+      refreshBtn.style.display = "none";
+    });
+
+    refreshBtn.addEventListener("click", () => {
+      shufflePosts();
+    });
+
+    function shufflePosts() {
+      const shuffledPosts = [...posts];
+      for (let i = shuffledPosts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledPosts[i], shuffledPosts[j]] = [shuffledPosts[j], shuffledPosts[i]];
+      }
+      renderPosts(shuffledPosts);
+    }
+  </script>
+
+</body>
+</html>

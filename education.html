@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat and Tabs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+
+        header {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        /* Style for tabs */
+        .tabs {
+            margin-top: 10px;
+        }
+
+        .tab {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #ddd;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 5px;
+        }
+
+        .tab:hover {
+            background-color: #bbb;
+        }
+
+        .tab.active {
+            background-color: #999;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Style for chat tabs */
+        .chat-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .chat-tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #1e1e1e;
+            color: white;
+            margin: 5px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .chat-tab:hover {
+            background-color: #1e1e1e;
+        }
+
+        .chats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .content {
+            width: 30%;
+            padding: 15px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        /* Style for the chatbot iframe */
+        #chatbot-container {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+
+        footer {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+            position: relative;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Cambridge Checkpoint Past Paper</h1>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab" onclick="openTab('pdfTab')">File</div>
+        <div class="tab" onclick="openTab('chatbotTab')">Education ChatBot</div>
+    </div>
+
+    <!-- Tab Content -->
+    <div id="pdfTab" class="tab-content">
+        <h2>Checkpoint Paper</h2>
+        <p>This is the Checkpoint Paper.</p>
+
+        <!-- Chat Tabs -->
+        <div class="chat-tabs">
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-English-0844-April-2016-Paper-2-Insert.pdf" class="chat-tab">English Insert</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-English-0844-April-2016-Paper-2.pdf" class="chat-tab">English Paper</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-English-0844-April-2016-Paper-2-Insert.pdf" class="chat-tab">English Ms</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-Mathematics-0845-April-2016-Paper-1.pdf" class="chat-tab">Math Paper 1</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-Science-0846-April-2016-Paper-1-MS.pdf" class="chat-tab">Math MS 1</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-Science-0846-April-2016-Paper-1.pdf" class="chat-tab">Science</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/Primary-Checkpoint-Science-0846-April-2016-Paper-1-MS.pdf" class="chat-tab">Science MS</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/october-2016-question-paper-2.pdf" class="chat-tab">Math Paper 2</a>
+            <a href="https://www.cienotes.com/wp-content/uploads/2020/03/october-2016-mark-scheme-2.pdf" class="chat-tab">Math MS 2</a>
+        </div>
+
+        <!-- Chat Content -->
+        <div class="chats">
+            <div id="File1" class="content">
+                <h2>File 1</h2>
+                <p>This file is English</p>
+            </div>
+
+            <div id="File2" class="content">
+                <h2>File 2</h2>
+                <p>This file is English</p>
+            </div>
+
+            <div id="File3" class="content">
+                <h2>File 3</h2>
+                <p>This file is English</p>
+            </div>
+
+            <div id="File4" class="content">
+                <h2>File 4</h2>
+                <p>This file is English</p>
+            </div>
+
+            <div id="File5" class="content">
+                <h2>File 5</h2>
+                <p>This file is Math</p>
+            </div>
+
+            <div id="File6" class="content">
+                <h2>File 6</h2>
+                <p>This file is Math</p>
+            </div>
+
+            <div id="File7" class="content">
+                <h2>File 7</h2>
+                <p>This file is Math.</p>
+            </div>
+
+            <div id="File8" class="content">
+                <h2>File 8</h2>
+                <p>This file is Science</p>
+            </div>
+
+            <div id="File9" class="content">
+                <h2>File 9</h2>
+                <p>This file is Science</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ChatBot Tab Content -->
+    <div id="chatbotTab" class="tab-content">
+        <h2>Education ChatBot</h2>
+        <iframe
+            src="https://www.chatbase.co/chatbot-iframe/n_m4DMm3tQe8f1rcisK92"
+            width="100%"
+            style="height: 100vh; border: none;"
+        ></iframe>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Professional Hub. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function openTab(tabId) {
+            // Hide all tab contents
+            var contents = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].classList.remove('active');
+            }
+
+            // Remove active class from all tabs
+            var tabs = document.getElementsByClassName('tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+
+            // Show the selected tab
+            document.getElementById(tabId).classList.add('active');
+
+            // Highlight the active tab button
+            event.currentTarget.classList.add('active');
+        }
+
+        // By default, open the first tab (Tab 1)
+        openTab('pdfTab');
+    </script>
+
+</body>
+
+</html>

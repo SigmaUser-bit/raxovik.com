@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raxovik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            /* Ensure no margin around the body */
+            padding: 0;
+            /* Ensure no padding around the body */
+            background-color: #f4f4f4;
+            color: #333;
+            overflow-x: hidden;
+            /* Prevent horizontal overflow */
+        }
+        
+        header {
+            background-color: #1e1e1e;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 15px;
+        }
+        
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+        
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .signin-btn {
+            padding: 10px 20px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            /* Make it look like a button */
+        }
+        
+        .signin-btn:hover {
+            background-color: #ff5722;
+        }
+        
+        section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 50vh;
+            /* Reduced height */
+            padding: 20px 0;
+            /* Reduced padding */
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        
+        section h2 {
+            margin-bottom: 20px;
+            /* Reduced margin */
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 10px;
+            /* Reduced gap */
+            max-width: 1200px;
+            /* Adjust as necessary */
+            width: 100%;
+            /* Ensure it doesn't exceed the container */
+            margin: 0 auto;
+            /* Center grid */
+        }
+        
+        .grid-item {
+            background-color: white;
+            padding: 20px;
+            /* Reduced padding */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .grid-item h3 {
+            color: #333;
+        }
+        
+        .grid-item p {
+            font-size: 16px;
+            color: #777;
+        }
+        
+        footer {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+            position: relative;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Raxovik</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="login.html">Education</a></li>
+            <li><a href="login.html">Game Hub</a></li>
+            <li><a href="login.html">Live Chat</a></li>
+            <li><a href="login.html">ChatBot</a></li>
+            <li><a href="login.html">Meme</a></li>
+            <li><a href="login.html">Forum</a></li>
+            <li><a href="login.html">Video</a></li>
+        </ul>
+        <a href="login.html" class="signin-btn">Sign In</a>
+        <!-- Redirect to signin.html -->
+    </nav>
+
+    <section id="education">
+        <h2>Education</h2>
+        <div class="grid-container">
+            <div class="grid-item">
+                <h3>Online Courses</h3>
+                <p>Access a variety of online courses to enhance your learning experience.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Tutorials</h3>
+                <p>Watch tutorials on subjects ranging from programming to design.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Certifications</h3>
+                <p>Get certified in your desired fields with our recognized certifications.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="gamehub">
+        <h2>Game Hub</h2>
+        <div class="grid-container">
+            <div class="grid-item">
+                <h3>Trending Games</h3>
+                <p>Check out the most popular games in the hub and join the fun.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Multiplayer</h3>
+                <p>Play multiplayer games with your friends and compete globally.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Exclusive Content</h3>
+                <p>Access exclusive game content, special deals, and early releases.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="livechat">
+        <h2>Live Chat</h2>
+        <div class="grid-container">
+            <div class="grid-item">
+                <h3>Group Chat</h3>
+                <p>Join various group chats to discuss topics you are passionate about.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Private Messaging</h3>
+                <p>Send private messages to friends and colleagues anytime.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="chatbot">
+        <h2>ChatBot</h2>
+        <div class="grid-container">
+            <div class="grid-item">
+                <h3>AI Assistant</h3>
+                <p>Our AI ChatBot is available 24/7 to answer your queries and provide help.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Interactive Conversations</h3>
+                <p>Engage in interactive conversations with the ChatBot for real-time support.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="comic">
+        <h2>Comic</h2>
+        <div class="grid-container">
+            <div class="grid-item">
+                <h3>Latest Releases</h3>
+                <p>Explore the latest comic releases and immerse yourself in great stories.</p>
+            </div>
+            <div class="grid-item">
+                <h3>Popular Series</h3>
+                <p>Catch up on popular comic series with new episodes every week.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Raxovik Inc. All coppights reserved.</p>
+    </footer>
+
+</body>
+
+</html>

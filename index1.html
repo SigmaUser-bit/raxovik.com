@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raxovik's home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        header {
+            background-color: #1e1e1e;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 15px;
+            position: relative;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .manage-account-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            position: absolute;
+            top: 7px;
+            right: 15px;
+        }
+
+        .manage-account-btn:hover {
+            background-color: #45a049;
+        }
+
+        .user-info {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            width: 250px;
+        }
+
+        .user-info p {
+            margin: 10px 0;
+        }
+
+        .user-info .logout-btn {
+            padding: 8px 16px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .user-info .logout-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        section h2 {
+            margin-bottom: 20px;
+        }
+
+        .news-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        .news-item {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .news-item h3 {
+            color: #333;
+        }
+
+        .news-item p {
+            font-size: 16px;
+            color: #777;
+        }
+
+        footer {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Raxovik</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="education.html">Education</a></li>
+            <li><a href="game.html">Game Hub</a></li>
+            <li><a href="livechat.html">Live Chat</a></li>
+            <li><a href="chatbot.html">ChatBot</a></li>
+            <li><a href="post.html">Meme</a></li>
+            <li><a href="forum3.html">Forum</a></li>
+            <li><a href="videosharing.html">Video</a></li>
+        </ul>
+        <button id="user-button" class="manage-account-btn">Show User Info</button>
+        <div id="user-info" class="user-info">
+            <p id="user-email"></p>
+            <button class="logout-btn" id="logout-button">Log out</button>
+        </div>
+    </nav>
+
+    <section id="news">
+        <h2>Latest News</h2>
+        <div class="news-container">
+            <div class="news-item">
+                <h3>News Title 1</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris fringilla eget.</p>
+            </div>
+            <div class="news-item">
+                <h3>News Title 2</h3>
+                <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin auctor erat non nisi vulputate.</p>
+            </div>
+            <div class="news-item">
+                <h3>News Title 3</h3>
+                <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
+                <div class="news-item">
+                    <h3>News Title 1</h3>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris
+                        fringilla eget.</p>
+                </div>
+                <div class="news-item">
+                    <h3>News Title 2</h3>
+                    <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin
+                        auctor erat non nisi vulputate.</p>
+                </div>
+                <div class="news-item">
+                    <h3>News Title 3</h3>
+                    <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
+                    <div class="news-item">
+                        <h3>News Title 1</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris
+                            fringilla eget.</p>
+                    </div>
+                    <div class="news-item">
+                        <h3>News Title 2</h3>
+                        <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin
+                            auctor erat non nisi vulputate.</p>
+                    </div>
+                    <div class="news-item">
+                        <h3>News Title 3</h3>
+                        <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
+                        <div class="news-item">
+                            <h3>News Title 1</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris
+                                fringilla eget.</p>
+                        </div>
+                        <div class="news-item">
+                            <h3>News Title 2</h3>
+                            <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin
+                                auctor erat non nisi vulputate.</p>
+                        </div>
+                        <div class="news-item">
+                            <h3>News Title 3</h3>
+                            <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Raxovik Inc. All coppights reserved.</p>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+            authDomain: "signin-320c9.firebaseapp.com",
+            projectId: "signin-320c9",
+            storageBucket: "signin-320c9.firebasestorage.app",
+            messagingSenderId: "1090838062436",
+            appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+            measurementId: "G-ZGWWRJJ43Y"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // DOM elements
+        const userButton = document.getElementById("user-button");
+        const userInfoDiv = document.getElementById("user-info");
+        const userEmail = document.getElementById("user-email");
+        const logoutButton = document.getElementById("logout-button");
+
+        // Show/hide user info section
+        userButton.addEventListener("click", () => {
+            userInfoDiv.style.display = (userInfoDiv.style.display === "block") ? "none" : "block";
+        });
+
+        // Auth state change listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                userEmail.textContent = `Logged in as: ${user.email}`;
+                userButton.style.display = "inline-block";
+            } else {
+                alert("You must be signed in to access this page.");
+                window.location.href = "login.html";
+            }
+        });
+
+        // Log out functionality
+        logoutButton.addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                await signOut(auth);
+                alert("Logged out successfully.");
+                window.location.href = "login.html";
+            } catch (error) {
+                console.error("Logout error:", error.message);
+            }
+        });
+    </script>
+</body>
+
+</html>

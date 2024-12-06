@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meme Posting App</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+
+    h1 {
+      text-align: center;
+      color: #343a40;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type="file"], input[type="email"], input[type="password"] {
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      width: 250px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #memesContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .meme {
+      background: white;
+      border: 1px solid #ced4da;
+      border-radius: 10px;
+      padding: 15px;
+      width: 300px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .meme:hover {
+      transform: scale(1.05);
+    }
+
+    .meme img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .meme p {
+      color: #495057;
+      margin-bottom: 10px;
+    }
+
+    .deleteBtn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .deleteBtn:hover {
+      background-color: #a71d2a;
+    }
+
+    .likeBtn, .dislikeBtn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .likeBtn:hover {
+      background-color: #218838;
+    }
+
+    .dislikeBtn {
+      background-color: #dc3545;
+    }
+
+    .dislikeBtn:hover {
+      background-color: #a71d2a;
+    }
+
+    #loginForm, #googleLoginBtn {
+      display: block;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meme Posting App</h1>
+
+  <!-- Login Form -->
+  <div id="loginPage">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login with Email</button>
+    </form>
+    <button id="googleLoginBtn">Login with Google</button>
+  </div>
+
+  <!-- Meme Posting Form (Initially hidden) -->
+  <div id="memePage" style="display: none;">
+    <form id="postForm">
+      <input type="file" id="imageFile" accept="image/*" required />
+      <button type="submit">Post Meme</button>
+    </form>
+    <div id="memesContainer"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, query, orderBy, serverTimestamp, updateDoc, doc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+      authDomain: "signin-320c9.firebaseapp.com",
+      databaseURL: "https://signin-320c9-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "signin-320c9",
+      storageBucket: "signin-320c9.firebasestorage.app",
+      messagingSenderId: "1090838062436",
+      appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+      measurementId: "G-ZGWWRJJ43Y"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // DOM Elements
+    const loginPage = document.getElementById("loginPage");
+    const memePage = document.getElementById("memePage");
+    const postForm = document.getElementById("postForm");
+    const imageFileInput = document.getElementById("imageFile");
+    const memesContainer = document.getElementById("memesContainer");
+
+    // Login with Email & Password
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        alert("Login failed: " + error.message);
+      }
+    });
+
+    // Login with Google
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (error) {
+        alert("Google Login failed: " + error.message);
+      }
+    });
+
+    // Logout User
+    function logoutUser() {
+      signOut(auth).then(() => {
+        loginPage.style.display = "block";
+        memePage.style.display = "none";
+      });
+    }
+
+    // Handle User Authentication
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginPage.style.display = "none";
+        memePage.style.display = "block";
+        displayMemes();
+      } else {
+        loginPage.style.display = "block";
+        memePage.style.display = "none";
+      }
+    });
+
+    // Post Meme
+    postForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = imageFileInput.files[0];
+      if (!file) return alert("Please select an image");
+
+      const userId = auth.currentUser.uid;
+      const userRef = doc(db, "users", userId);
+
+      try {
+        const userDoc = await getDoc(userRef);
+
+        // Check cooldown
+        const currentTime = Date.now();
+        const lastPostAt = userDoc.exists() ? userDoc.data().lastPostAt?.toMillis() : 0;
+
+        // 2-minute cooldown
+        const cooldown = 2 * 60 * 1000;
+        if (lastPostAt && currentTime - lastPostAt < cooldown) {
+          const remainingTime = Math.ceil((cooldown - (currentTime - lastPostAt)) / 1000);
+          return alert(`Please wait ${remainingTime} seconds before posting again.`);
+        }
+
+        // Read the image file
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const imageBase64 = reader.result;
+
+          // Create a new meme document
+          const memeDoc = {
+            userId,
+            userEmail: auth.currentUser.email,
+            imageBase64,
+            createdAt: serverTimestamp(),
+            likes: [], // Initialize as an empty array
+            dislikes: [], // Initialize as an empty array
+            likesCount: 0, // Initialize to 0
+            dislikesCount: 0, // Initialize to 0
+            };
+
+
+          await addDoc(collection(db, "memes"), memeDoc);
+
+          // Update user's last post timestamp
+          await updateDoc(userRef, { lastPostAt: serverTimestamp() });
+
+          // Clear the input
+          imageFileInput.value = "";
+          displayMemes();
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("Error posting meme:", error);
+        alert("Error posting meme.");
+      }
+    });
+
+    // Display Memes
+    async function displayMemes() {
+  memesContainer.innerHTML = "";
+
+  const memesQuery = query(collection(db, "memes"), orderBy("createdAt", "desc"));
+  const querySnapshot = await getDocs(memesQuery);
+  const user = auth.currentUser; // Get the currently logged-in user
+
+  querySnapshot.forEach((doc) => {
+    const memeData = doc.data();
+    const memeElement = document.createElement("div");
+    memeElement.classList.add("meme");
+    memeElement.innerHTML = `
+      <img src="${memeData.imageBase64}" alt="Meme Image">
+      <p>Uploaded by: ${memeData.userEmail}</p>
+      <div>
+        <button class="likeBtn" id="like-${doc.id}">👍</button>
+        <span id="likeCount-${doc.id}">${memeData.likesCount}</span>
+      </div>
+      <div>
+        <button class="dislikeBtn" id="dislike-${doc.id}">👎</button>
+        <span id="dislikeCount-${doc.id}">${memeData.dislikesCount}</span>
+      </div>
+    `;
+    // Check if the current user is the owner of the meme
+    if (user && user.uid === memeData.userId) {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.classList.add("deleteBtn");
+      deleteBtn.innerHTML = "🗑️";
+      deleteBtn.onclick = () => deleteMeme(doc.id);
+      memeElement.appendChild(deleteBtn);
+    }
+
+    memesContainer.appendChild(memeElement);
+
+    // Attach event listeners
+    document.getElementById(`like-${doc.id}`).addEventListener("click", () => likeMeme(doc.id));
+    document.getElementById(`dislike-${doc.id}`).addEventListener("click", () => dislikeMeme(doc.id));
+  });
+}
+// Delete Meme
+async function deleteMeme(memeId) {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to delete a meme.");
+      return;
+    }
+
+    const memeRef = doc(db, "memes", memeId);
+    const memeDoc = await getDoc(memeRef);
+
+    if (!memeDoc.exists()) {
+      alert("Meme not found.");
+      return;
+    }
+
+    const memeData = memeDoc.data();
+    if (memeData.userId !== user.uid) {
+      alert("You can only delete your own memes.");
+      return;
+    }
+
+    await deleteDoc(memeRef);
+    alert("Meme deleted successfully.");
+    displayMemes(); // Refresh the list after deletion
+  } catch (error) {
+    console.error("Error deleting meme:", error);
+    alert("Error deleting meme.");
+  }
+}
+// Like Meme
+async function likeMeme(memeId) {
+  try {
+    const memeRef = doc(db, "memes", memeId);
+    const memeDoc = await getDoc(memeRef);
+    const memeData = memeDoc.data();
+
+    const likes = Array.isArray(memeData.likes) ? memeData.likes : [];
+    const dislikes = Array.isArray(memeData.dislikes) ? memeData.dislikes : [];
+
+    const userId = auth.currentUser.uid;
+    if (userId) {
+      if (likes.includes(userId)) {
+        // Undo like
+        await updateDoc(memeRef, {
+          likes: likes.filter((id) => id !== userId),
+          likesCount: likes.length - 1,
+        });
+      } else {
+        // Add like and undo dislike (if any)
+        await updateDoc(memeRef, {
+          likes: [...likes, userId],
+          likesCount: likes.length + 1,
+          dislikes: dislikes.filter((id) => id !== userId),
+          dislikesCount: dislikes.length - 1 > 0 ? dislikes.length - 1 : 0,
+        });
+      }
+      displayMemes(); // Refresh the memes
+    } else {
+      alert("You must be signed in to like a meme.");
+    }
+  } catch (error) {
+    console.error("Error liking meme:", error);
+    alert("Error liking meme.");
+  }
+}
+// Dislike Meme
+async function dislikeMeme(memeId) {
+  try {
+    const memeRef = doc(db, "memes", memeId);
+    const memeDoc = await getDoc(memeRef);
+    const memeData = memeDoc.data();
+
+    const dislikes = Array.isArray(memeData.dislikes) ? memeData.dislikes : [];
+    const likes = Array.isArray(memeData.likes) ? memeData.likes : [];
+
+    const userId = auth.currentUser.uid;
+    if (userId) {
+      if (dislikes.includes(userId)) {
+        // Undo dislike
+        await updateDoc(memeRef, {
+          dislikes: dislikes.filter((id) => id !== userId),
+          dislikesCount: dislikes.length - 1,
+        });
+      } else {
+        // Add dislike and undo like (if any)
+        await updateDoc(memeRef, {
+          dislikes: [...dislikes, userId],
+          dislikesCount: dislikes.length + 1,
+          likes: likes.filter((id) => id !== userId),
+          likesCount: likes.length - 1 > 0 ? likes.length - 1 : 0,
+        });
+      }
+      displayMemes(); // Refresh the memes
+    } else {
+      alert("You must be signed in to dislike a meme.");
+    }
+  } catch (error) {
+    console.error("Error disliking meme:", error);
+    alert("Error disliking meme.");
+  }
+}
+  </script>
+</body>
+</html>

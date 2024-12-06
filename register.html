@@ -1,0 +1,191 @@
+<!-- register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        /* General Reset and Body Styling */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f4037, #99f2c8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+        }
+
+        /* Container Styling */
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Form Styling */
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        /* Input Fields */
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 30px;
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        input[type="email"]::placeholder,
+        input[type="password"]::placeholder {
+            color: #ffffff;
+            opacity: 0.7;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Submit Button */
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #fff;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Toggle Link */
+        .toggle {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #ffdd57;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .toggle:hover {
+            color: #fff176;
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 500px) {
+            .container {
+                padding: 30px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            button {
+                font-size: 16px;
+            }
+
+            .toggle {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="registerForm">
+            <h2>Register</h2>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Password" required>
+            <button type="submit">Register</button>
+            <a href="login.html" class="toggle">Already have an account? Login</a>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import necessary functions from Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+            authDomain: "signin-320c9.firebaseapp.com",
+            projectId: "signin-320c9",
+            storageBucket: "signin-320c9.firebasestorage.app",
+            messagingSenderId: "1090838062436",
+            appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+            measurementId: "G-ZGWWRJJ43Y"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
+
+        // Form element
+        const registerForm = document.getElementById('registerForm');
+
+        // Registration logic
+        registerForm.onsubmit = async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                alert('Account created successfully!');
+                // Redirect to login page after registration
+                window.location.href = 'login.html';
+            } catch (error) {
+                alert(`Registration failed: ${error.message}`);
+            }
+        };
+    </script>
+</body>
+</html>

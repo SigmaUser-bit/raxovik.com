@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Q&A Forum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1d3354, #d64045);
+            color: #fff;
+        }
+        
+        #login_container {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            color: #333;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: #444;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            color: #fff;
+            background: #d64045;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #b53036;
+        }
+        
+        .google-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #4285f4;
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .google-button i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="login_container">
+        <h1>Login to Q&A Forum</h1>
+        <input type="email" id="email" placeholder="Enter your email" />
+        <input type="password" id="password" placeholder="Enter your password" />
+        <button id="login_email">Login with Email</button>
+        <button class="google-button" id="login_google">
+            <i class="fab fa-google"></i> Login with Google
+        </button>
+    </div>
+
+    <script>
+        // Authentication API Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+            authDomain: "signin-320c9.firebaseapp.com",
+            projectId: "signin-320c9",
+            storageBucket: "signin-320c9.firebasestorage.app",
+            messagingSenderId: "1090838062436",
+            appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+            measurementId: "G-ZGWWRJJ43Y"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Email/Password Login
+        document.getElementById("login_email").onclick = () => {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    alert("Login successful!");
+                    window.location.href = "index.html"; // Redirect to Forum Page
+                })
+                .catch(error => alert("Login failed: " + error.message));
+        };
+
+        // Google Login
+        document.getElementById("login_google").onclick = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(() => {
+                    alert("Login successful!");
+                    window.location.href = "Forum.html"; // Redirect to Forum Page
+                })
+                .catch(error => alert("Login failed: " + error.message));
+        };
+    </script>
+</body>
+
+</html>

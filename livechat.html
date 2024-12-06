@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raxovik-LiveChat 2.0</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #d64045, #1d3354);
+            color: #fff;
+        }
+        
+        #login_container,
+        #chat_container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            color: #fff;
+            background: #d64045;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #b53036;
+        }
+        
+        .google-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #4285f4;
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .google-button i {
+            margin-right: 10px;
+        }
+        
+        #chat_content_container {
+            height: 400px;
+            overflow-y: auto;
+            width: 100%;
+            border: 2px dashed #1d3354;
+            padding: 10px;
+            background: #f9f9f9;
+            margin-bottom: 10px;
+        }
+        
+        .message_container {
+            margin-bottom: 15px;
+        }
+        
+        .message_user {
+            font-weight: bold;
+            color: #1d3354;
+        }
+        
+        .message_content {
+            font-size: 16px;
+            margin-top: 5px;
+            color: #333;
+        }
+        
+        .message_timestamp {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        #chat_input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: none;
+        }
+        
+        #logout_button {
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 8px;
+            background: #555;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        #logout_button:hover {
+            background: #333;
+        }
+        
+         ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: #d64045;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="login_container">
+        <h1>Raxovik-LiveChat Login</h1>
+        <input type="email" id="email" placeholder="Enter your email" />
+        <input type="password" id="password" placeholder="Enter your password" />
+        <button id="login_email">Login with Email</button>
+        <button class="google-button" id="login_google">
+      <i class="fab fa-google"></i> Login with Google
+    </button>
+    </div>
+
+    <div id="chat_container">
+        <div id="chat_content_container"></div>
+        <textarea id="chat_input" rows="1" placeholder="Type a message..."></textarea>
+        <button id="logout_button">Logout</button>
+    </div>
+
+    <script>
+        // Firebase Configurations
+        const firebaseConfigAuth = {
+            apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+            authDomain: "signin-320c9.firebaseapp.com",
+            projectId: "signin-320c9",
+            storageBucket: "signin-320c9.firebasestorage.app",
+            messagingSenderId: "1090838062436",
+            appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+            measurementId: "G-ZGWWRJJ43Y"
+        };
+
+        const firebaseConfigChat = {
+            apiKey: "AIzaSyBjdyt_u2eODOngmyYl79ANehGBXOCJm9k",
+            authDomain: "livechat1-7512e.firebaseapp.com",
+            databaseURL: "https://livechat1-7512e-default-rtdb.firebaseio.com",
+            projectId: "livechat1-7512e",
+            storageBucket: "livechat1-7512e.firebasestorage.app",
+            messagingSenderId: "232248506652",
+            appId: "1:232248506652:web:328d31f38e333532a0e2d9"
+        };
+
+        // Initialize Firebase
+        const authApp = firebase.initializeApp(firebaseConfigAuth, "authApp");
+        const chatApp = firebase.initializeApp(firebaseConfigChat, "chatApp");
+        const auth = authApp.auth();
+        const db = chatApp.database();
+
+        const badWords = ["dumb", "drake", "yagn", "dumbass", "ass", "idiot", "stupid", "moron", "fuck", "nigga", "niga", "niger", "nigger", "nig", "cock", "pussy", "dick", "cum", "shit", "poop", "poo", "cac", "lon", "dit", "asshole", "bitch", "motherfucker", "motherfvcker", "fvck", "cali", "bac ki", "parki", "barki", "butt", "hentai", "penis", "pennis", "jack-ass", "nigra", "Bastard", "Cornhole", "porn", "sex", "foggot", "kill", "cong hoa", "conghoa", "gay", "cho de", "Whore", "Wanker", "arse", "furry", "Bollocks", "didy", "diddy", "furries", "racist", "Prick", "paki", "Slut", "Spic", "twat", "rubbish", "Cracker", "Coonass", "messi", "@gmail.com", "sh1t", "sh|t", "slutyl"]; // Add your bad words here
+        // Add your bad words here
+
+        // DOM Elements
+        const loginContainer = document.getElementById('login_container');
+        const chatContainer = document.getElementById('chat_container');
+        const chatContent = document.getElementById('chat_content_container');
+        const chatInput = document.getElementById('chat_input');
+        const logoutButton = document.getElementById('logout_button');
+
+        // Login with Email
+        document.getElementById('login_email').onclick = () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(result => startChat(result.user))
+                .catch(error => alert('Login failed: ' + error.message));
+        };
+
+        // Login with Google
+        document.getElementById('login_google').onclick = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(result => startChat(result.user))
+                .catch(error => alert('Login failed: ' + error.message));
+        };
+
+        // Auto-login
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                startChat(user);
+            } else {
+                loginContainer.style.display = 'flex';
+                chatContainer.style.display = 'none';
+            }
+        });
+
+        // Logout Button
+        logoutButton.onclick = () => {
+            auth.signOut().then(() => {
+                loginContainer.style.display = 'flex';
+                chatContainer.style.display = 'none';
+            });
+        };
+
+        function startChat(user) {
+            loginContainer.style.display = 'none';
+            chatContainer.style.display = 'flex';
+
+            chatInput.addEventListener('keydown', event => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    if (chatInput.value.trim()) {
+                        const filteredMessage = filterMessage(chatInput.value.trim());
+                        sendMessage(user, filteredMessage);
+                        chatInput.value = '';
+                    }
+                }
+            });
+
+            refreshChat();
+        }
+
+        function filterMessage(message) {
+            const phoneRegex = /\b\d{10,15}\b/g; // Detect phone numbers
+            const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g; // Detect email addresses
+            const badWordRegex = new RegExp(`\\b(${badWords.join('|')})\\b`, 'gi'); // Fixed syntax
+
+            // Validate against phone numbers and emails
+            if (phoneRegex.test(message) || emailRegex.test(message)) {
+                alert("Messages containing phone numbers or email addresses are not allowed.");
+                return ""; // Block sending
+            }
+
+            // Replace bad words with *
+            return message.replace(badWordRegex, match => "*".repeat(match.length));
+        }
+
+
+        function sendMessage(user, message) {
+            if (!message) return; // Do not send empty or invalid messages
+
+            const messageRef = db.ref("chats/");
+            messageRef.once("value").then(snapshot => {
+                const index = snapshot.numChildren() + 1;
+                const username = user.email.replace("@gmail.com", ""); // Remove @gmail.com
+                messageRef.child(`message_${index}`).set({
+                    name: username,
+                    message: message,
+                    index: index,
+                    timestamp: Date.now(),
+                });
+            });
+        }
+
+        function refreshChat() {
+            db.ref("chats/").on("value", snapshot => {
+                chatContent.innerHTML = "";
+                const messages = Object.values(snapshot.val() || {}).sort((a, b) => a.index - b.index);
+                messages.forEach(({
+                    name,
+                    message,
+                    timestamp
+                }) => {
+                    const container = document.createElement("div");
+                    container.className = "message_container";
+                    container.innerHTML = `
+    <div class="message_user"><strong>${name}</strong></div>
+    <div class="message_content">${message}</div>
+    <div class="message_timestamp">${new Date(timestamp).toLocaleTimeString()}</div>
+`;
+                    chatContent.appendChild(container);
+                });
+                chatContent.scrollTop = chatContent.scrollHeight;
+            });
+        }
+    </script>
+</body>
+
+</html>
