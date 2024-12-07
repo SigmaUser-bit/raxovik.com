@@ -462,7 +462,8 @@
     // Track wrong attempts: {questionIndex: count}
     let wrongAttempts = {};
 
-    onAuthStateChanged(auth, (user) => {
+    // Authentication State Listener
+    onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       if (user) {
         loginPage.style.display = "none";
@@ -499,55 +500,75 @@
       }
     });
 
-    // Rating System
+    // Fetch User Ratings
     async function fetchUserRatings() {
       if (!currentUser) return;
-      const ratingsSnap = await getDocs(collection(db, "ratings"));
-      userRatings = {};
-      ratingsSnap.forEach((ratingDoc) => {
-        const data = ratingDoc.data();
-        if (data.user === currentUser.uid) {
+      try {
+        const ratingQuery = query(collection(db, "ratings"), where("user", "==", currentUser.uid));
+        const ratingSnapshots = await getDocs(ratingQuery);
+        userRatings = {};
+        ratingSnapshots.forEach((doc) => {
+          const data = doc.data();
           userRatings[data.quizId] = data.value;
-        }
-      });
+        });
+      } catch (error) {
+        console.error("Error fetching user ratings:", error);
+      }
     }
+
+    // Discover Quizzes
+    discoverBtn.addEventListener("click", async () => {
+      await fetchUserRatings();
+      mainPage.style.display = "none";
+      discoverPage.style.display = "block";
+      displayQuizzes();
+    });
 
     // Display Quizzes
     async function displayQuizzes() {
-      const quizQuery = query(collection(db, "quizzes"), orderBy("createdAt", "desc"));
-      const quizSnapshots = await getDocs(quizQuery);
+      try {
+        const quizQuery = query(collection(db, "quizzes"), orderBy("createdAt", "desc"));
+        const quizSnapshots = await getDocs(quizQuery);
 
-      quizzesContainer.innerHTML = "";
-      for (let quizDoc of quizSnapshots.docs) {
-        const quiz = quizDoc.data();
-        const quizId = quizDoc.id;
-
-        const plays = quiz.plays || 0;
-        const likes = quiz.likes || 0;
-        const dislikes = quiz.dislikes || 0;
-
-        const quizDiv = document.createElement("div");
-        quizDiv.classList.add("quiz");
-        let htmlContent = `<h3>${quiz.title}</h3>
-                           <p>Played: ${plays} time(s)</p>
-                           <p>Likes: ${likes} | Dislikes: ${dislikes}</p>
-                           <button onclick="startQuiz('${quizId}')">Play Quiz</button>`;
-
-        if (currentUser && currentUser.email === quiz.author) {
-          htmlContent += `<button onclick="editQuiz('${quizId}')">Edit Quiz</button>`;
-          htmlContent += `<button id="deleteBtn" onclick="deleteQuiz('${quizId}')">Delete Quiz</button>`;
+        quizzesContainer.innerHTML = "";
+        if (quizSnapshots.empty) {
+          quizzesContainer.innerHTML = "<p>No quizzes available at the moment.</p>";
+          return;
         }
 
-        const userRating = userRatings[quizId] || null;
-        // If user clicks like and already liked: remove like
-        // If user clicks dislike and already disliked: remove dislike
-        htmlContent += `
-          <button class="rating-btn" onclick="rateQuiz('${quizId}', 'like')">${userRating==='like'?'Unlike':'Like'}</button>
-          <button class="rating-btn" onclick="rateQuiz('${quizId}', 'dislike')">${userRating==='dislike'?'Undislike':'Dislike'}</button>
-        `;
+        for (let quizDoc of quizSnapshots.docs) {
+          const quiz = quizDoc.data();
+          const quizId = quizDoc.id;
 
-        quizDiv.innerHTML = htmlContent;
-        quizzesContainer.appendChild(quizDiv);
+          const plays = quiz.plays || 0;
+          const likes = quiz.likes || 0;
+          const dislikes = quiz.dislikes || 0;
+
+          const quizDiv = document.createElement("div");
+          quizDiv.classList.add("quiz");
+          let htmlContent = `<h3>${quiz.title}</h3>
+                             <p>Played: ${plays} time(s)</p>
+                             <p>Likes: ${likes} | Dislikes: ${dislikes}</p>
+                             <button onclick="startQuiz('${quizId}')">Play Quiz</button>`;
+
+          if (currentUser && currentUser.email === quiz.author) {
+            htmlContent += `<button onclick="editQuiz('${quizId}')">Edit Quiz</button>`;
+            htmlContent += `<button id="deleteBtn" onclick="deleteQuiz('${quizId}')">Delete Quiz</button>`;
+          }
+
+          const userRating = userRatings[quizId] || null;
+          // Rating Buttons
+          htmlContent += `
+            <button class="rating-btn" onclick="rateQuiz('${quizId}', 'like')">${userRating==='like'?'Unlike':'Like'}</button>
+            <button class="rating-btn" onclick="rateQuiz('${quizId}', 'dislike')">${userRating==='dislike'?'Undislike':'Dislike'}</button>
+          `;
+
+          quizDiv.innerHTML = htmlContent;
+          quizzesContainer.appendChild(quizDiv);
+        }
+      } catch (error) {
+        console.error("Error displaying quizzes:", error);
+        alert("There was an error fetching quizzes. Please try again later.");
       }
     }
 
@@ -558,32 +579,40 @@
         return;
       }
 
-      const ratingDocId = quizId + "_" + currentUser.uid;
-      const ratingRef = doc(db, "ratings", ratingDocId);
-      const ratingSnap = await getDoc(ratingRef);
-      const quizRef = doc(db, "quizzes", quizId);
+      try {
+        const ratingDocId = `${quizId}_${currentUser.uid}`;
+        const ratingRef = doc(db, "ratings", ratingDocId);
+        const ratingSnap = await getDoc(ratingRef);
+        const quizRef = doc(db, "quizzes", quizId);
 
-      if (ratingSnap.exists()) {
-        // User has rated before
-        const prevValue = ratingSnap.data().value;
-        if (prevValue === value) {
-          // Same rating clicked again => remove rating
-          await deleteDoc(ratingRef);
-          if (value === 'like') {
-            await updateDoc(quizRef, { likes: increment(-1) });
+        if (ratingSnap.exists()) {
+          const prevValue = ratingSnap.data().value;
+          if (prevValue === value) {
+            // Remove rating
+            await deleteDoc(ratingRef);
+            if (value === 'like') {
+              await updateDoc(quizRef, { likes: increment(-1) });
+            } else {
+              await updateDoc(quizRef, { dislikes: increment(-1) });
+            }
+            delete userRatings[quizId];
           } else {
-            await updateDoc(quizRef, { dislikes: increment(-1) });
+            // Update rating
+            if (prevValue === 'like') {
+              await updateDoc(quizRef, { likes: increment(-1) });
+            } else {
+              await updateDoc(quizRef, { dislikes: increment(-1) });
+            }
+            await setDoc(ratingRef, { quizId, user: currentUser.uid, value });
+            if (value === 'like') {
+              await updateDoc(quizRef, { likes: increment(1) });
+            } else {
+              await updateDoc(quizRef, { dislikes: increment(1) });
+            }
+            userRatings[quizId] = value;
           }
-          delete userRatings[quizId];
         } else {
-          // Different rating => remove old rating, add new one
-          // First remove old rating effect
-          if (prevValue === 'like') {
-            await updateDoc(quizRef, { likes: increment(-1) });
-          } else {
-            await updateDoc(quizRef, { dislikes: increment(-1) });
-          }
-          // Now add new rating
+          // Add new rating
           await setDoc(ratingRef, { quizId, user: currentUser.uid, value });
           if (value === 'like') {
             await updateDoc(quizRef, { likes: increment(1) });
@@ -592,55 +621,54 @@
           }
           userRatings[quizId] = value;
         }
-      } else {
-        // No rating before
-        await setDoc(ratingRef, { quizId, user: currentUser.uid, value });
-        if (value === 'like') {
-          await updateDoc(quizRef, { likes: increment(1) });
-        } else {
-          await updateDoc(quizRef, { dislikes: increment(1) });
-        }
-        userRatings[quizId] = value;
+
+        displayQuizzes();
+      } catch (error) {
+        console.error("Error rating quiz:", error);
+        alert("There was an error rating the quiz. Please try again.");
       }
-
-      displayQuizzes();
     };
-
-    // Discover Quizzes
-    discoverBtn.addEventListener("click", async () => {
-      await fetchUserRatings();
-      mainPage.style.display = "none";
-      discoverPage.style.display = "block";
-      displayQuizzes();
-    });
 
     // Delete Quiz
     window.deleteQuiz = async (quizId) => {
       const confirmed = confirm("Are you sure you want to delete this quiz?");
       if (confirmed) {
-        await deleteDoc(doc(db, "quizzes", quizId));
-        alert("Quiz deleted successfully!");
-        displayQuizzes();
+        try {
+          await deleteDoc(doc(db, "quizzes", quizId));
+          alert("Quiz deleted successfully!");
+          displayQuizzes();
+        } catch (error) {
+          console.error("Error deleting quiz:", error);
+          alert("There was an error deleting the quiz. Please try again.");
+        }
       }
     };
 
-    // Mode selection UI
+    // Handle Mode UI: Show/Hide time input fields based on selected mode
+    function handleModeUI(mode, timeLabel, timeInput, longTimeLabel, longTimeInput) {
+      // Hide all time inputs by default
+      timeLabel.style.display = "none";
+      timeInput.value = "";
+      longTimeLabel.style.display = "none";
+      longTimeInput.value = "";
+
+      // Show relevant time inputs based on mode
+      if (mode === 'authorTimeShort') {
+        timeLabel.style.display = "block";
+      } else if (mode === 'authorTimeLong' || mode === 'userSetTime') {
+        longTimeLabel.style.display = "block";
+      }
+    }
+
+    // Event Listeners for Mode Selection in Post Quiz Form
     quizModeSelect.addEventListener("change", () => {
       handleModeUI(quizModeSelect.value, timeSettingLabel, timeInput, longTimeSettingLabel, longTimeInput);
     });
+
+    // Event Listeners for Mode Selection in Edit Quiz Form
     editQuizModeSelect.addEventListener("change", () => {
       handleModeUI(editQuizModeSelect.value, editTimeSettingLabel, editTimeInput, editLongTimeSettingLabel, editLongTimeInput);
     });
-
-    function handleModeUI(mode, shortLabel, shortInput, longLabel, longInput) {
-      shortLabel.style.display = "none";
-      longLabel.style.display = "none";
-      if (mode === 'authorTimeShort') {
-        shortLabel.style.display = "block";
-      } else if (mode === 'authorTimeLong') {
-        longLabel.style.display = "block";
-      }
-    }
 
     // Post a Quiz
     postBtn.addEventListener("click", () => {
@@ -675,15 +703,27 @@
     // Post Quiz Submit
     document.getElementById("postQuizForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const title = quizTitleInput.value;
+      const title = quizTitleInput.value.trim();
       const mode = quizModeSelect.value;
+      const shuffle = shuffleQuestionsInput.checked;
       const questions = collectQuestions("#questionsContainer");
+
+      if (questions.length === 0) {
+        return alert("Please add at least one question.");
+      }
+
+      // Ensure that each question has exactly four options
+      for (let i = 0; i < questions.length; i++) {
+        if (questions[i].options.length !== 4) {
+          return alert(`Question ${i + 1} must have exactly four options.`);
+        }
+      }
 
       let quizData = {
         title,
-        questions,
-        shuffle: shuffleQuestionsInput.checked,
+        shuffle,
         mode,
+        questions,
         author: auth.currentUser.email,
         createdAt: new Date(),
         plays: 0,
@@ -705,17 +745,24 @@
         quizData.entireQuizTime = lt; // long limit in seconds
       }
 
-      await addDoc(collection(db, "quizzes"), quizData);
-      alert("Quiz posted successfully!");
-      quizPage.style.display = "none";
-      mainPage.style.display = "block";
+      try {
+        await addDoc(collection(db, "quizzes"), quizData);
+        alert("Quiz posted successfully!");
+        document.getElementById("postQuizForm").reset();
+        quizPage.style.display = "none";
+        mainPage.style.display = "block";
+      } catch (error) {
+        console.error("Error posting quiz:", error);
+        alert("There was an error posting your quiz. Please try again.");
+      }
     });
 
+    // Collect Questions
     function collectQuestions(selector) {
       const questionElements = document.querySelectorAll(selector + " .question");
       return Array.from(questionElements).map((q) => ({
-        question: q.querySelector(".question-text").value,
-        options: Array.from(q.querySelectorAll(".option")).map((opt) => opt.value),
+        question: q.querySelector(".question-text").value.trim(),
+        options: Array.from(q.querySelectorAll(".option")).map((opt) => opt.value.trim()),
         correctAnswer: parseInt(q.querySelector(".correct-answer").value),
       }));
     }
@@ -724,7 +771,10 @@
     window.editQuiz = async (quizId) => {
       currentQuizId = quizId;
       const quizDocSnap = await getDoc(doc(db, "quizzes", quizId));
-      if (!quizDocSnap.exists()) return;
+      if (!quizDocSnap.exists()) {
+        alert("Quiz not found.");
+        return;
+      }
       const quiz = quizDocSnap.data();
 
       editQuestionsContainer.innerHTML = '';
@@ -738,6 +788,8 @@
         editTimeInput.value = quiz.timeLimit || '';
       } else if (quiz.mode === 'authorTimeLong') {
         editLongTimeInput.value = quiz.entireQuizTime || '';
+      } else if (quiz.mode === 'userSetTime') {
+        editLongTimeInput.value = quiz.userSetTime || '';
       }
 
       quiz.questions.forEach((q) => {
@@ -772,43 +824,102 @@
     // Update Quiz
     document.getElementById("editQuizForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const title = editQuizTitleInput.value;
+      const title = editQuizTitleInput.value.trim();
       const mode = editQuizModeSelect.value;
+      const shuffle = editShuffleQuestionsInput.checked;
       const questions = collectQuestions("#editQuestionsContainer");
+
+      if (questions.length === 0) {
+        return alert("Please add at least one question.");
+      }
+
+      // Ensure that each question has exactly four options
+      for (let i = 0; i < questions.length; i++) {
+        if (questions[i].options.length !== 4) {
+          return alert(`Question ${i + 1} must have exactly four options.`);
+        }
+      }
 
       let updates = {
         title,
-        questions,
-        shuffle: editShuffleQuestionsInput.checked,
-        mode
+        shuffle,
+        mode,
+        questions
       };
 
       if (mode === 'authorTimeShort') {
         const t = parseInt(editTimeInput.value);
-        if (isNaN(t) || t < 5 || t > 60) return alert("Time must be 5-60 seconds");
+        if (isNaN(t) || t < 5 || t > 60) {
+          return alert("Time must be between 5 and 60 seconds.");
+        }
         updates.timeLimit = t;
         updates.entireQuizTime = deleteField();
+        updates.userSetTime = deleteField();
       } else if (mode === 'authorTimeLong') {
         const lt = parseInt(editLongTimeInput.value);
-        if (isNaN(lt) || lt < 30 || lt > 1800) return alert("Time must be 30-1800 seconds");
+        if (isNaN(lt) || lt < 30 || lt > 1800) {
+          return alert("Time must be between 30 and 1800 seconds.");
+        }
         updates.entireQuizTime = lt;
         updates.timeLimit = deleteField();
+        updates.userSetTime = deleteField();
+      } else if (mode === 'userSetTime') {
+        const ust = parseInt(editLongTimeInput.value); // Reusing longTimeInput for userSetTime
+        if (isNaN(ust) || ust < 600 || ust > 1800) {
+          return alert("Time must be between 600 and 1800 seconds (10-30 minutes).");
+        }
+        updates.userSetTime = ust;
+        updates.timeLimit = deleteField();
+        updates.entireQuizTime = deleteField();
       } else {
         updates.timeLimit = deleteField();
         updates.entireQuizTime = deleteField();
+        updates.userSetTime = deleteField();
       }
 
-      await updateDoc(doc(db, "quizzes", currentQuizId), updates);
-      alert("Quiz updated successfully!");
-      editQuizPage.style.display = "none";
-      mainPage.style.display = "block";
+      try {
+        await updateDoc(doc(db, "quizzes", currentQuizId), updates);
+        alert("Quiz updated successfully!");
+        editQuizPage.style.display = "none";
+        mainPage.style.display = "block";
+      } catch (error) {
+        console.error("Error updating quiz:", error);
+        alert("There was an error updating your quiz. Please try again.");
+      }
     });
 
     // Start Quiz
     window.startQuiz = async (quizId) => {
-      const quizDocSnap = await getDoc(doc(db, "quizzes", quizId));
-      if (quizDocSnap.exists()) {
-        currentQuiz = quizDocSnap.data();
+      try {
+        const quizDocSnap = await getDoc(doc(db, "quizzes", quizId));
+        if (!quizDocSnap.exists()) {
+          alert("Quiz not found.");
+          return;
+        }
+        const quiz = quizDocSnap.data();
+
+        // **Validation Check: Ensure the quiz is multiple-choice**
+        if (
+          !quiz.questions ||
+          !Array.isArray(quiz.questions) ||
+          quiz.questions.length === 0
+        ) {
+          alert("You can only access multiple choice(QUIZ).");
+          return;
+        }
+
+        for (let q of quiz.questions) {
+          if (
+            !q.options ||
+            !Array.isArray(q.options) ||
+            q.options.length !== 4
+          ) {
+            alert("You can only access multiple choice(QUIZ).");
+            return;
+          }
+        }
+
+        currentQuiz = quiz;
         currentQuizId = quizId;
         currentQuestionIndex = 0;
         score = 0;
@@ -841,6 +952,9 @@
         setTimerForMode(currentQuiz.mode);
 
         displayQuestion();
+      } catch (error) {
+        console.error("Error starting quiz:", error);
+        alert("There was an error starting the quiz. Please try again.");
       }
     };
 
@@ -891,7 +1005,7 @@
         optionsContainer.appendChild(optionBtn);
       });
 
-      // In classic mode or authorTimeShort/Long where we go question by question:
+      // For classic or time-based modes, show next button after answering
       if (currentQuiz.mode === 'classic' || currentQuiz.mode === 'authorTimeShort' || currentQuiz.mode === 'authorTimeLong') {
         nextQuestionBtn.style.display = "none";
       }
@@ -914,43 +1028,26 @@
         wrongAttempts[currentQuestionIndex] = (wrongAttempts[currentQuestionIndex] || 0) + 1;
       }
 
-      // For classic or authorTimeShort/Long: show next button after delay
+      // For classic or authorTime modes: show next button after delay
       if (currentQuiz.mode === 'classic' || currentQuiz.mode === 'authorTimeShort' || currentQuiz.mode === 'authorTimeLong') {
         setTimeout(() => {
           nextQuestionBtn.style.display = "block";
         }, 500);
-      } else if (currentQuiz.mode === 'userSetTime') {
-        // userSetTime mode: loop questions infinitely until timer ends
-        setTimeout(() => {
-          nextQuestionUserSetTime();
-        }, 500);
       }
     }
 
-    function nextQuestion() {
+    // Next Question
+    nextQuestionBtn.addEventListener("click", () => {
       currentQuestionIndex++;
       if (currentQuestionIndex < currentQuiz.questions.length) {
         displayQuestion();
+        nextQuestionBtn.style.display = "none";
       } else {
         showResults();
       }
-    }
-
-    // For userSetTime mode, loop infinitely
-    function nextQuestionUserSetTime() {
-      currentQuestionIndex = (currentQuestionIndex + 1) % currentQuiz.questions.length;
-      if (timeRemaining <= 0) {
-        showResults();
-      } else {
-        displayQuestion();
-      }
-    }
-
-    // Next Question (For classic and authorTime modes)
-    nextQuestionBtn.addEventListener("click", () => {
-      nextQuestion();
     });
 
+    // Show Results
     function showResults() {
       quizQuestionDisplay.style.display = "none";
       optionsContainer.style.display = "none";
@@ -959,11 +1056,16 @@
       timerDiv.style.display = "none";
       clearInterval(timerInterval);
 
+      // Update plays count
       updateDoc(doc(db, "quizzes", currentQuizId), {
         plays: increment(1)
       });
 
-      resultScore.innerText = `Your Score: ${score} / ${currentQuiz.questions.length}`;
+      // Calculate overall accuracy
+      const totalQuestions = currentQuiz.questions.length;
+      const accuracy = (score / totalQuestions) * 100;
+
+      resultScore.innerText = `Your Score: ${score} / ${totalQuestions} (${accuracy.toFixed(2)}% Accuracy)`;
 
       // Show wrong attempts summary
       let summaryHtml = "<h3>Wrong Attempts Summary</h3>";
@@ -971,7 +1073,7 @@
       for (let idx in wrongAttempts) {
         anyWrong = true;
         const q = currentQuiz.questions[idx];
-        summaryHtml += `<p>Question: ${q.question}<br>Wrong Attempts: ${wrongAttempts[idx]}</p>`;
+        summaryHtml += `<p><strong>Question:</strong> ${q.question}<br><strong>Wrong Attempts:</strong> ${wrongAttempts[idx]}</p>`;
       }
       if (!anyWrong) {
         summaryHtml += "<p>You got all questions correct!</p>";
