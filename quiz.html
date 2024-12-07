@@ -816,9 +816,9 @@
 
         // If userSetTime mode, ask user for time
         if (currentQuiz.mode === "userSetTime") {
-          let userTimeMin = prompt("Enter time in minutes (10-30):");
+          let userTimeMin = prompt("Enter time in minutes (1-30):");
           let userTime = parseInt(userTimeMin);
-          if (isNaN(userTime) || userTime < 10 || userTime > 30) {
+          if (isNaN(userTime) || userTime < 1 || userTime > 30) {
             alert("Invalid time. Defaulting to 10 minutes.");
             userTime = 10;
           }
