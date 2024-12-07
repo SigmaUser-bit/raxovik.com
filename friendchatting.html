@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Firebase Friend & Chat System</title>
+    <!-- Firebase Compat SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <style>
+        /* Basic Reset */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        header {
+            background-color: #4267B2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Authentication Section */
+
+        .auth-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .auth-container form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-container input {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .auth-container button {
+            padding: 10px;
+            background-color: #4267B2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .auth-container button:hover {
+            background-color: #365899;
+        }
+
+        .google-btn {
+            background-color: #db4437;
+        }
+
+        .google-btn:hover {
+            background-color: #c33d2e;
+        }
+
+        .message {
+            color: red;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Main Interface */
+
+        .main-interface {
+            flex: 1;
+            display: flex;
+            height: 100%;
+        }
+
+        /* Sidebar - Users List */
+
+        .sidebar {
+            width: 30%;
+            border-right: 1px solid #ccc;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+        }
+
+        .users-list {
+            list-style-type: none;
+        }
+
+        .users-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .users-list li:last-child {
+            border-bottom: none;
+        }
+
+        .users-list img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .users-list .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .users-list .user-name {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .users-list .send-request-btn,
+        .users-list .chat-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .users-list .send-request-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .users-list .send-request-btn:hover {
+            background-color: #45a049;
+        }
+
+        .users-list .chat-btn {
+            background-color: #008CBA; /* Blue color */
+            color: white;
+            margin-left: 10px;
+        }
+
+        .users-list .chat-btn:hover {
+            background-color: #007B9E;
+        }
+
+        /* Chat and Friend Requests */
+
+        .chat-section {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Friend Requests */
+
+        .friend-requests {
+            margin-bottom: 20px;
+        }
+
+        .friend-requests h3 {
+            margin-bottom: 10px;
+        }
+
+        .friend-requests ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .friend-requests li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .friend-requests li:last-child {
+            border-bottom: none;
+        }
+
+        .friend-requests .request-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .friend-requests .request-info img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .friend-requests .request-info .request-name {
+            font-weight: bold;
+        }
+
+        .friend-requests .request-actions button {
+            padding: 5px 10px;
+            margin-left: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .friend-requests .request-actions .accept-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .friend-requests .request-actions .accept-btn:hover {
+            background-color: #45a049;
+        }
+
+        .friend-requests .request-actions .decline-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .friend-requests .request-actions .decline-btn:hover {
+            background-color: #e53935;
+        }
+
+        /* Chat Header */
+
+        .chat-header {
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Chat Messages */
+
+        .chat-messages {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .chat-messages .message {
+            margin-bottom: 10px;
+        }
+
+        .chat-messages .message .sender {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        /* Chat Input */
+
+        .chat-input {
+            display: flex;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #4267B2;
+            color: white;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .chat-input button:hover {
+            background-color: #365899;
+        }
+
+        /* Friend Request Modal */
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4267B2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .modal-content button:hover {
+            background-color: #365899;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Username Modal */
+        /* Updated to remove close button and handle errors inline */
+
+        .modal#username-modal .close-modal {
+            display: none; /* Hide the close button */
+        }
+
+        .modal-content .error-message {
+            color: red;
+            margin-bottom: 10px;
+            display: none;
+            text-align: center;
+        }
+
+        /* Logout Button */
+
+        .logout-container {
+            text-align: center;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            background-color: #333;
+        }
+
+        /* Scrollbar Styling (Optional) */
+
+        .users-list,
+        .friend-requests ul,
+        .chat-messages {
+            scrollbar-width: thin;
+            scrollbar-color: #888 #f0f2f5;
+        }
+
+        .users-list::-webkit-scrollbar,
+        .friend-requests ul::-webkit-scrollbar,
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .users-list::-webkit-scrollbar-track,
+        .friend-requests ul::-webkit-scrollbar-track,
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f0f2f5;
+        }
+
+        .users-list::-webkit-scrollbar-thumb,
+        .friend-requests ul::-webkit-scrollbar-thumb,
+        .chat-messages::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 4px;
+            border: 2px solid #f0f2f5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Firebase Friend & Chat System</h1>
+        </header>
+
+        <!-- Authentication Section -->
+        <div class="auth-section active" id="auth-section">
+            <div class="auth-container">
+                <h2>Login</h2>
+                <div class="message" id="auth-message"></div>
+                <form id="auth-form">
+                    <input type="email" id="email" placeholder="Email" required />
+                    <input type="password" id="password" placeholder="Password" required />
+                    <button type="submit">Login</button>
+                </form>
+                <button class="google-btn" id="google-signin">Sign in with Google</button>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="main-interface" id="main-interface" style="display: none;">
+            <!-- Sidebar - Users List -->
+            <div class="sidebar">
+                <h3>All Users</h3>
+                <ul class="users-list" id="users-ul">
+                    <!-- Users will be dynamically populated here -->
+                </ul>
+            </div>
+
+            <!-- Chat and Friend Requests -->
+            <div class="chat-section">
+                <!-- Friend Requests -->
+                <div class="friend-requests">
+                    <h3>Friend Requests</h3>
+                    <ul id="friend-requests-ul">
+                        <!-- Friend requests will be dynamically populated here -->
+                    </ul>
+                </div>
+
+                <!-- Chat Header -->
+                <div class="chat-header" id="chat-header">
+                    <span>Select a friend to start chatting.</span>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Chat messages will appear here -->
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Type your message..." />
+                    <button id="send-message-btn">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout Button -->
+        <div class="logout-container" id="logout-container" style="display: none;">
+            <button class="logout-btn" id="logout-btn">Logout</button>
+        </div>
+    </div>
+
+    <!-- Friend Request Modal -->
+    <div class="modal" id="friend-request-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-friend-request-modal">&times;</button>
+            <h3>Send Friend Request</h3>
+            <form id="send-friend-request-form">
+                <input type="email" id="friend-email-input" placeholder="Friend's Email" required />
+                <button type="submit">Send Request</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Username Modal -->
+    <div class="modal" id="username-modal">
+        <div class="modal-content">
+            <!-- Removed the close button to prevent users from closing the modal -->
+            <h3>Set Your Username</h3>
+            <form id="set-username-form">
+                <input type="text" id="username-input" placeholder="Enter your username" required />
+                <div class="error-message" id="username-error">Username is already taken. Please try another.</div>
+                <button type="submit">Save Username</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+            authDomain: "signin-320c9.firebaseapp.com",
+            databaseURL: "https://signin-320c9-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "signin-320c9",
+            storageBucket: "signin-320c9.firebasestorage.app",
+            messagingSenderId: "1090838062436",
+            appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+            measurementId: "G-ZGWWRJJ43Y"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM Elements
+        const authSection = document.getElementById('auth-section');
+        const authForm = document.getElementById('auth-form');
+        const authMessage = document.getElementById('auth-message');
+        const googleSignIn = document.getElementById('google-signin');
+
+        const mainInterface = document.getElementById('main-interface');
+        const usersUl = document.getElementById('users-ul');
+        const friendRequestModal = document.getElementById('friend-request-modal');
+        const closeFriendRequestModal = document.getElementById('close-friend-request-modal');
+        const sendFriendRequestForm = document.getElementById('send-friend-request-form');
+        const friendEmailInput = document.getElementById('friend-email-input');
+
+        const usernameModal = document.getElementById('username-modal');
+        const setUsernameForm = document.getElementById('set-username-form');
+        const usernameInput = document.getElementById('username-input');
+        const usernameError = document.getElementById('username-error');
+
+        const logoutContainer = document.getElementById('logout-container');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        const friendRequestsUl = document.getElementById('friend-requests-ul');
+
+        const chatHeader = document.getElementById('chat-header');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendMessageBtn = document.getElementById('send-message-btn');
+
+        let currentUser = null;
+        let selectedFriendId = null;
+        let chatUnsubscribe = null;
+
+        // Authentication Form Submission (Login Only)
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email || !password) {
+                authMessage.style.color = 'red';
+                authMessage.textContent = 'Please enter both email and password.';
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    authMessage.style.color = 'green';
+                    authMessage.textContent = 'Logged in successfully!';
+                    authForm.reset();
+                })
+                .catch((error) => {
+                    authMessage.style.color = 'red';
+                    authMessage.textContent = error.message;
+                });
+        });
+
+        // Google Sign-In
+        googleSignIn.addEventListener('click', () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
+                    // Check if user data exists
+                    const userRef = db.collection('users').doc(user.uid);
+                    userRef.get().then((doc) => {
+                        if (!doc.exists) {
+                            // If new user, set default data with lowercase email and prompt for username
+                            userRef.set({
+                                username: '', // Empty username to prompt
+                                email: user.email.toLowerCase(),
+                                photoURL: user.photoURL || null,
+                                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        } else {
+                            // Update lastLogin
+                            userRef.update({
+                                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    });
+                })
+                .catch((error) => {
+                    alert('Google Sign-In Error: ' + error.message);
+                });
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => {
+                    // Signed out
+                })
+                .catch((error) => {
+                    alert('Logout Error: ' + error.message);
+                });
+        });
+
+        // Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                authSection.style.display = 'none';
+                mainInterface.style.display = 'flex';
+                logoutContainer.style.display = 'block';
+                initializeUserDocument(user).then((needsUsername) => {
+                    if (needsUsername) {
+                        // Prompt the user to set a username
+                        usernameModal.classList.add('active');
+                    } else {
+                        listAllUsers();
+                        fetchFriendRequests();
+                    }
+                });
+            } else {
+                currentUser = null;
+                authSection.style.display = 'flex';
+                mainInterface.style.display = 'none';
+                logoutContainer.style.display = 'none';
+                if (chatUnsubscribe) {
+                    chatUnsubscribe();
+                    chatUnsubscribe = null;
+                }
+                chatHeader.innerHTML = '<span>Select a friend to start chatting.</span>';
+                chatMessages.innerHTML = '';
+            }
+        });
+
+        // Initialize User Document in Firestore and Check if Username Exists
+        async function initializeUserDocument(user) {
+            const userRef = db.collection('users').doc(user.uid);
+            const doc = await userRef.get();
+            if (!doc.exists) {
+                // New user without a username
+                await userRef.set({
+                    username: '', // Empty username
+                    email: user.email.toLowerCase(),
+                    photoURL: user.photoURL || null,
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return true; // Indicates that the user needs to set a username
+            } else {
+                // Update lastLogin
+                await userRef.update({
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                const userData = doc.data();
+                return !userData.username; // Returns true if username is missing
+            }
+        }
+
+        // Handle Username Form Submission
+        setUsernameForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = usernameInput.value.trim();
+            if (!username) {
+                displayUsernameError('Username cannot be empty.');
+                return;
+            }
+            // Check if the username is already taken
+            db.collection('users')
+                .where('username', '==', username)
+                .get()
+                .then((snapshot) => {
+                    if (!snapshot.empty) {
+                        displayUsernameError('Username is already taken. Please try another.');
+                    } else {
+                        // Update the user's document with the new username
+                        db.collection('users').doc(currentUser.uid).update({
+                            username: username
+                        })
+                            .then(() => {
+                                usernameModal.classList.remove('active');
+                                listAllUsers();
+                                fetchFriendRequests();
+                            })
+                            .catch((error) => {
+                                console.error('Error setting username:', error);
+                                displayUsernameError('Error setting username. Please try again.');
+                            });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error checking username:', error);
+                    displayUsernameError('Error checking username availability.');
+                });
+        });
+
+        // Function to Display Username Errors Inline
+        function displayUsernameError(message) {
+            usernameError.textContent = message;
+            usernameError.style.display = 'block';
+        }
+
+        // Remove Close Button Functionality by Hiding It
+        // Already done in CSS by setting display: none for .modal#username-modal .close-modal
+
+        // List All Users with Chat Button for Friends
+        function listAllUsers() {
+            usersUl.innerHTML = '';
+            db.collection('users').get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        if (doc.id !== currentUser.uid) { // Exclude current user
+                            // Check if already friends
+                            db.collection('users').doc(currentUser.uid).collection('friends').doc(doc.id).get()
+                                .then((friendDoc) => {
+                                    // Check if a friend request already sent or received
+                                    db.collection('friendRequests')
+                                        .where('from', '==', currentUser.uid)
+                                        .where('to', '==', doc.id)
+                                        .get()
+                                        .then((sentSnapshot) => {
+                                            db.collection('friendRequests')
+                                                .where('from', '==', doc.id)
+                                                .where('to', '==', currentUser.uid)
+                                                .get()
+                                                .then((receivedSnapshot) => {
+                                                    let buttonText = '';
+                                                    let buttonDisabled = false;
+                                                    let isFriend = false;
+                                                    if (friendDoc.exists) {
+                                                        buttonText = 'Friends';
+                                                        buttonDisabled = true;
+                                                        isFriend = true;
+                                                    } else if (!sentSnapshot.empty) {
+                                                        buttonText = 'Request Sent';
+                                                        buttonDisabled = true;
+                                                    } else if (!receivedSnapshot.empty) {
+                                                        buttonText = 'Respond to Request';
+                                                        buttonDisabled = false;
+                                                    } else {
+                                                        buttonText = 'Add Friend';
+                                                        buttonDisabled = false;
+                                                    }
+
+                                                    const li = document.createElement('li');
+
+                                                    const userInfoDiv = document.createElement('div');
+                                                    userInfoDiv.classList.add('user-info');
+
+                                                    const userImg = document.createElement('img');
+                                                    userImg.src = userData.photoURL || 'https://via.placeholder.com/40';
+                                                    userImg.alt = userData.username || 'No Name';
+
+                                                    const userNameSpan = document.createElement('span');
+                                                    userNameSpan.classList.add('user-name');
+                                                    userNameSpan.textContent = userData.username || 'No Name';
+
+                                                    userInfoDiv.appendChild(userImg);
+                                                    userInfoDiv.appendChild(userNameSpan);
+
+                                                    const actionBtn = document.createElement('button');
+
+                                                    if (isFriend) {
+                                                        actionBtn.textContent = 'Chat';
+                                                        actionBtn.classList.add('chat-btn');
+                                                        actionBtn.addEventListener('click', () => {
+                                                            selectFriend(doc.id, userData.username, userData.photoURL);
+                                                        });
+                                                    } else {
+                                                        actionBtn.textContent = buttonText;
+                                                        actionBtn.classList.add('send-request-btn');
+                                                        if (buttonDisabled) {
+                                                            actionBtn.disabled = true;
+                                                        }
+
+                                                        if (buttonText === 'Add Friend') {
+                                                            actionBtn.addEventListener('click', () => {
+                                                                sendFriendRequest(doc.id, userData.email);
+                                                            });
+                                                        } else if (buttonText === 'Respond to Request') {
+                                                            actionBtn.addEventListener('click', () => {
+                                                                respondToFriendRequest(doc.id, userData.username, userData.photoURL);
+                                                            });
+                                                        }
+                                                    }
+
+                                                    // Container for user info and buttons
+                                                    const userContainer = document.createElement('div');
+                                                    userContainer.style.display = 'flex';
+                                                    userContainer.style.alignItems = 'center';
+                                                    userContainer.style.width = '100%';
+
+                                                    userContainer.appendChild(userInfoDiv);
+                                                    userContainer.appendChild(actionBtn);
+
+                                                    li.appendChild(userContainer);
+                                                    usersUl.appendChild(li);
+                                                });
+                                        });
+                                });
+                        }
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching users:', error);
+                });
+        }
+
+        // Send Friend Request
+        function sendFriendRequest(friendId, friendEmail) {
+            db.collection('friendRequests').add({
+                from: currentUser.uid,
+                to: friendId,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+                .then(() => {
+                    alert('Friend request sent!');
+                    listAllUsers(); // Refresh the users list to update button state
+                })
+                .catch((error) => {
+                    console.error('Error sending friend request:', error);
+                    alert('Error sending friend request.');
+                });
+        }
+
+        // Respond to Friend Request (Accept or Decline)
+        function respondToFriendRequest(friendId, friendName, friendPhotoURL) {
+            // Prompt the user to accept or decline
+            const response = confirm(`Do you want to accept the friend request from ${friendName}?`);
+            if (response) {
+                // Accept the request
+                db.collection('friendRequests')
+                    .where('from', '==', friendId)
+                    .where('to', '==', currentUser.uid)
+                    .get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            // Add to friends collection for both users
+                            db.collection('users').doc(currentUser.uid).collection('friends').doc(friendId).set({
+                                since: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            db.collection('users').doc(friendId).collection('friends').doc(currentUser.uid).set({
+                                since: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            // Delete the friend request
+                            doc.ref.delete();
+                        });
+                        alert(`You are now friends with ${friendName}!`);
+                        listAllUsers(); // Refresh the users list
+                    })
+                    .catch((error) => {
+                        console.error('Error accepting friend request:', error);
+                        alert('Error accepting friend request.');
+                    });
+            } else {
+                // Decline the request
+                db.collection('friendRequests')
+                    .where('from', '==', friendId)
+                    .where('to', '==', currentUser.uid)
+                    .get()
+                    .then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            // Delete the friend request
+                            doc.ref.delete();
+                        });
+                        alert(`Friend request from ${friendName} declined.`);
+                        listAllUsers(); // Refresh the users list
+                    })
+                    .catch((error) => {
+                        console.error('Error declining friend request:', error);
+                        alert('Error declining friend request.');
+                    });
+            }
+        }
+
+        // Fetch Friend Requests
+        function fetchFriendRequests() {
+            friendRequestsUl.innerHTML = '';
+            db.collection('friendRequests')
+                .where('to', '==', currentUser.uid)
+                .onSnapshot((snapshot) => {
+                    friendRequestsUl.innerHTML = '';
+                    if (snapshot.empty) {
+                        friendRequestsUl.innerHTML = '<li>No incoming friend requests.</li>';
+                        return;
+                    }
+
+                    snapshot.forEach((doc) => {
+                        const requestData = doc.data();
+                        // Fetch sender's information
+                        db.collection('users').doc(requestData.from).get()
+                            .then((userDoc) => {
+                                if (userDoc.exists) {
+                                    const userData = userDoc.data();
+                                    const li = document.createElement('li');
+
+                                    const requestInfoDiv = document.createElement('div');
+                                    requestInfoDiv.classList.add('request-info');
+
+                                    const userImg = document.createElement('img');
+                                    userImg.src = userData.photoURL || 'https://via.placeholder.com/30';
+                                    userImg.alt = userData.username || 'No Name';
+
+                                    const requestNameSpan = document.createElement('span');
+                                    requestNameSpan.classList.add('request-name');
+                                    requestNameSpan.textContent = userData.username || 'No Name';
+
+                                    requestInfoDiv.appendChild(userImg);
+                                    requestInfoDiv.appendChild(requestNameSpan);
+
+                                    const requestActionsDiv = document.createElement('div');
+                                    requestActionsDiv.classList.add('request-actions');
+
+                                    const acceptBtn = document.createElement('button');
+                                    acceptBtn.textContent = 'Accept';
+                                    acceptBtn.classList.add('accept-btn');
+                                    acceptBtn.addEventListener('click', () => {
+                                        acceptFriendRequest(doc.id, userDoc.id);
+                                    });
+
+                                    const declineBtn = document.createElement('button');
+                                    declineBtn.textContent = 'Decline';
+                                    declineBtn.classList.add('decline-btn');
+                                    declineBtn.addEventListener('click', () => {
+                                        declineFriendRequest(doc.id);
+                                    });
+
+                                    requestActionsDiv.appendChild(acceptBtn);
+                                    requestActionsDiv.appendChild(declineBtn);
+
+                                    li.appendChild(requestInfoDiv);
+                                    li.appendChild(requestActionsDiv);
+                                    friendRequestsUl.appendChild(li);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error fetching requester data:', error);
+                            });
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error fetching friend requests:', error);
+                });
+        }
+
+        // Accept Friend Request
+        function acceptFriendRequest(requestId, friendId) {
+            // Add to friends collection for both users
+            db.collection('users').doc(currentUser.uid).collection('friends').doc(friendId).set({
+                since: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            db.collection('users').doc(friendId).collection('friends').doc(currentUser.uid).set({
+                since: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            // Delete the friend request
+            db.collection('friendRequests').doc(requestId).delete()
+                .then(() => {
+                    alert('Friend request accepted!');
+                    listAllUsers(); // Refresh the users list
+                })
+                .catch((error) => {
+                    console.error('Error accepting friend request:', error);
+                    alert('Error accepting friend request.');
+                });
+        }
+
+        // Decline Friend Request
+        function declineFriendRequest(requestId) {
+            // Delete the friend request
+            db.collection('friendRequests').doc(requestId).delete()
+                .then(() => {
+                    alert('Friend request declined.');
+                    listAllUsers(); // Refresh the users list
+                })
+                .catch((error) => {
+                    console.error('Error declining friend request:', error);
+                    alert('Error declining friend request.');
+                });
+        }
+
+        // Select a Friend to Chat
+        function selectFriend(friendId, friendName, friendPhotoURL) {
+            selectedFriendId = friendId;
+            chatHeader.innerHTML = `<span>Chat with ${friendName}</span>`;
+            chatMessages.innerHTML = '';
+
+            // Unsubscribe from previous chat listener if any
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+            }
+
+            // Determine chat ID (sorted UIDs to ensure unique chat document)
+            const chatId = currentUser.uid < friendId ? `${currentUser.uid}_${friendId}` : `${friendId}_${currentUser.uid}`;
+
+            // Listen for real-time updates to chat messages
+            chatUnsubscribe = db.collection('chats').doc(chatId).collection('messages')
+                .orderBy('timestamp')
+                .onSnapshot((snapshot) => {
+                    chatMessages.innerHTML = '';
+                    snapshot.forEach((doc) => {
+                        const msg = doc.data();
+                        const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('message');
+                        messageDiv.innerHTML = `<span class="sender">${msg.sender === currentUser.uid ? 'You' : friendName}:</span> ${msg.message}`;
+                        chatMessages.appendChild(messageDiv);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    });
+                });
+        }
+
+        // Handle Send Message
+        sendMessageBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (!messageText || !selectedFriendId) return;
+
+            // Determine chat ID
+            const chatId = currentUser.uid < selectedFriendId ? `${currentUser.uid}_${selectedFriendId}` : `${selectedFriendId}_${currentUser.uid}`;
+
+            // Add message to Firestore
+            db.collection('chats').doc(chatId).collection('messages').add({
+                sender: currentUser.uid,
+                message: messageText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+                .then(() => {
+                    messageInput.value = '';
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
+                    alert('Error sending message.');
+                });
+        }
+
+        // Optional: Open Friend Request Modal (Not used in this implementation)
+        /*
+        sendFriendRequestBtn.addEventListener('click', () => {
+          friendRequestModal.classList.add('active');
+        });
+
+        closeFriendRequestModal.addEventListener('click', () => {
+          friendRequestModal.classList.remove('active');
+        });
+
+        sendFriendRequestForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const friendEmail = friendEmailInput.value.trim().toLowerCase();
+          // Implement sending friend request by email
+        });
+        */
+    </script>
+</body>
+
+</html>
