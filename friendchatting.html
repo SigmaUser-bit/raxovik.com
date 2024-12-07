@@ -8,15 +8,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
     <style>
         /* Basic Reset */
-
+        
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
+        
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
@@ -25,7 +26,7 @@
             align-items: center;
             height: 100vh;
         }
-
+        
         .container {
             width: 90%;
             max-width: 1200px;
@@ -37,16 +38,15 @@
             flex-direction: column;
             height: 90vh;
         }
-
+        
         header {
             background-color: #4267B2;
             color: white;
             padding: 20px;
             text-align: center;
         }
-
         /* Authentication Section */
-
+        
         .auth-section {
             flex: 1;
             display: flex;
@@ -54,29 +54,29 @@
             align-items: center;
             padding: 20px;
         }
-
+        
         .auth-container {
             width: 100%;
             max-width: 400px;
         }
-
+        
         .auth-container h2 {
             margin-bottom: 20px;
             text-align: center;
         }
-
+        
         .auth-container form {
             display: flex;
             flex-direction: column;
         }
-
+        
         .auth-container input {
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-
+        
         .auth-container button {
             padding: 10px;
             background-color: #4267B2;
@@ -87,50 +87,49 @@
             margin-bottom: 10px;
             font-size: 16px;
         }
-
+        
         .auth-container button:hover {
             background-color: #365899;
         }
-
+        
         .google-btn {
             background-color: #db4437;
         }
-
+        
         .google-btn:hover {
             background-color: #c33d2e;
         }
-
+        
         .message {
             color: red;
             margin-bottom: 15px;
             text-align: center;
         }
-
         /* Main Interface */
-
+        
         .main-interface {
             flex: 1;
             display: flex;
             height: 100%;
         }
-
         /* Sidebar - Users List */
-
+        
         .sidebar {
             width: 30%;
             border-right: 1px solid #ccc;
             padding: 20px;
             overflow-y: auto;
+            position: relative;
         }
-
+        
         .sidebar h3 {
             margin-bottom: 15px;
         }
-
+        
         .users-list {
             list-style-type: none;
         }
-
+        
         .users-list li {
             display: flex;
             justify-content: space-between;
@@ -138,28 +137,28 @@
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
-
+        
         .users-list li:last-child {
             border-bottom: none;
         }
-
+        
         .users-list img {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             margin-right: 10px;
         }
-
+        
         .users-list .user-info {
             display: flex;
             align-items: center;
         }
-
+        
         .users-list .user-name {
             font-weight: bold;
             margin-left: 10px;
         }
-
+        
         .users-list .send-request-btn,
         .users-list .chat-btn {
             padding: 5px 10px;
@@ -168,28 +167,38 @@
             cursor: pointer;
             font-size: 14px;
         }
-
+        
         .users-list .send-request-btn {
             background-color: #4CAF50;
             color: white;
         }
-
+        
         .users-list .send-request-btn:hover {
             background-color: #45a049;
         }
-
+        
         .users-list .chat-btn {
-            background-color: #008CBA; /* Blue color */
+            background-color: #008CBA;
+            /* Blue color */
             color: white;
             margin-left: 10px;
         }
-
+        
         .users-list .chat-btn:hover {
             background-color: #007B9E;
         }
-
+        /* Badge for Unread Messages */
+        
+        .badge {
+            background-color: red;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-size: 12px;
+            margin-left: 5px;
+        }
         /* Chat and Friend Requests */
-
+        
         .chat-section {
             width: 70%;
             display: flex;
@@ -197,22 +206,21 @@
             padding: 20px;
             overflow: hidden;
         }
-
         /* Friend Requests */
-
+        
         .friend-requests {
             margin-bottom: 20px;
         }
-
+        
         .friend-requests h3 {
             margin-bottom: 10px;
         }
-
+        
         .friend-requests ul {
             list-style-type: none;
             padding: 0;
         }
-
+        
         .friend-requests li {
             display: flex;
             justify-content: space-between;
@@ -220,27 +228,27 @@
             padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
-
+        
         .friend-requests li:last-child {
             border-bottom: none;
         }
-
+        
         .friend-requests .request-info {
             display: flex;
             align-items: center;
         }
-
+        
         .friend-requests .request-info img {
             width: 30px;
             height: 30px;
             border-radius: 50%;
             margin-right: 10px;
         }
-
+        
         .friend-requests .request-info .request-name {
             font-weight: bold;
         }
-
+        
         .friend-requests .request-actions button {
             padding: 5px 10px;
             margin-left: 5px;
@@ -249,68 +257,87 @@
             cursor: pointer;
             font-size: 14px;
         }
-
+        
         .friend-requests .request-actions .accept-btn {
             background-color: #4CAF50;
             color: white;
         }
-
+        
         .friend-requests .request-actions .accept-btn:hover {
             background-color: #45a049;
         }
-
+        
         .friend-requests .request-actions .decline-btn {
             background-color: #f44336;
             color: white;
         }
-
+        
         .friend-requests .request-actions .decline-btn:hover {
             background-color: #e53935;
         }
-
         /* Chat Header */
-
+        
         .chat-header {
             margin-bottom: 20px;
             font-size: 20px;
             font-weight: bold;
         }
-
         /* Chat Messages */
-
+        
         .chat-messages {
             flex: 1;
             border: 1px solid #ccc;
             border-radius: 4px;
             padding: 10px;
             overflow-y: auto;
+            /* Add scroll for messages */
             margin-bottom: 15px;
             background-color: #f9f9f9;
         }
-
+        
         .chat-messages .message {
             margin-bottom: 10px;
         }
-
+        
         .chat-messages .message .sender {
             font-weight: bold;
             margin-right: 5px;
         }
-
+        
+        .chat-messages .message img {
+            max-width: 200px;
+            border-radius: 4px;
+        }
         /* Chat Input */
-
+        
         .chat-input {
             display: flex;
+            align-items: center;
         }
-
-        .chat-input input {
+        
+        .chat-input input[type="text"] {
             flex: 1;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px 0 0 4px;
             outline: none;
         }
-
+        
+        .chat-input input[type="file"] {
+            display: none;
+        }
+        
+        .chat-input label {
+            padding: 10px;
+            background-color: #4267B2;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: -1px;
+        }
+        
         .chat-input button {
             padding: 10px 20px;
             border: none;
@@ -319,14 +346,24 @@
             border-radius: 0 4px 4px 0;
             cursor: pointer;
             font-size: 16px;
+            margin-left: -1px;
         }
-
+        
         .chat-input button:hover {
             background-color: #365899;
         }
-
         /* Friend Request Modal */
-
+        
+        .chat-input {
+            display: flex;
+            position: sticky;
+            /* Fix input to the bottom */
+            bottom: 0;
+            background-color: #fff;
+            padding: 10px 0;
+            z-index: 100;
+        }
+        
         .modal {
             position: fixed;
             top: 0;
@@ -339,11 +376,11 @@
             justify-content: center;
             z-index: 1000;
         }
-
+        
         .modal.active {
             display: flex;
         }
-
+        
         .modal-content {
             background: white;
             padding: 20px;
@@ -351,12 +388,12 @@
             width: 300px;
             position: relative;
         }
-
+        
         .modal-content h3 {
             margin-bottom: 15px;
             text-align: center;
         }
-
+        
         .modal-content input {
             width: 100%;
             padding: 10px;
@@ -364,7 +401,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-
+        
         .modal-content button {
             width: 100%;
             padding: 10px;
@@ -375,11 +412,11 @@
             cursor: pointer;
             font-size: 16px;
         }
-
+        
         .modal-content button:hover {
             background-color: #365899;
         }
-
+        
         .close-modal {
             position: absolute;
             top: 10px;
@@ -389,29 +426,28 @@
             font-size: 18px;
             cursor: pointer;
         }
-
         /* Username Modal */
         /* Updated to remove close button and handle errors inline */
-
+        
         .modal#username-modal .close-modal {
-            display: none; /* Hide the close button */
+            display: none;
+            /* Hide the close button */
         }
-
+        
         .modal-content .error-message {
             color: red;
             margin-bottom: 10px;
             display: none;
             text-align: center;
         }
-
         /* Logout Button */
-
+        
         .logout-container {
             text-align: center;
             padding: 10px;
             border-top: 1px solid #ccc;
         }
-
+        
         .logout-btn {
             padding: 10px 20px;
             background-color: #555;
@@ -421,38 +457,80 @@
             cursor: pointer;
             font-size: 16px;
         }
-
+        
         .logout-btn:hover {
             background-color: #333;
         }
-
         /* Scrollbar Styling (Optional) */
-
+        
         .users-list,
         .friend-requests ul,
         .chat-messages {
             scrollbar-width: thin;
             scrollbar-color: #888 #f0f2f5;
         }
-
+        
         .users-list::-webkit-scrollbar,
         .friend-requests ul::-webkit-scrollbar,
         .chat-messages::-webkit-scrollbar {
             width: 8px;
         }
-
+        
         .users-list::-webkit-scrollbar-track,
         .friend-requests ul::-webkit-scrollbar-track,
         .chat-messages::-webkit-scrollbar-track {
             background: #f0f2f5;
         }
-
+        
         .users-list::-webkit-scrollbar-thumb,
         .friend-requests ul::-webkit-scrollbar-thumb,
         .chat-messages::-webkit-scrollbar-thumb {
             background-color: #888;
             border-radius: 4px;
             border: 2px solid #f0f2f5;
+        }
+        /* Notification Toast */
+        
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1001;
+            right: 30px;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        
+        @keyframes fadein {
+            from {
+                bottom: 0;
+                opacity: 0;
+            }
+            to {
+                bottom: 30px;
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeout {
+            from {
+                bottom: 30px;
+                opacity: 1;
+            }
+            to {
+                bottom: 0;
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -481,7 +559,13 @@
         <div class="main-interface" id="main-interface" style="display: none;">
             <!-- Sidebar - Users List -->
             <div class="sidebar">
-                <h3>All Users</h3>
+                <h3>
+                    All Users
+                    <button id="refresh-button" style="margin-left: 10px; padding: 5px 10px; cursor: pointer;">
+            🔄 Refresh
+        </button>
+                </h3>
+                <input type="text" id="search-bar" placeholder="Search username..." />
                 <ul class="users-list" id="users-ul">
                     <!-- Users will be dynamically populated here -->
                 </ul>
@@ -503,15 +587,19 @@
                 </div>
 
                 <!-- Chat Messages -->
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Type your message..." />
+                    <input type="file" id="image-input" accept="image/*" />
+                    <label for="image-input">📷</label>
+                    <button id="send-message-btn">Send</button>
+                </div>
                 <div class="chat-messages" id="chat-messages">
                     <!-- Chat messages will appear here -->
                 </div>
 
                 <!-- Chat Input -->
-                <div class="chat-input">
-                    <input type="text" id="message-input" placeholder="Type your message..." />
-                    <button id="send-message-btn">Send</button>
-                </div>
+
+
             </div>
         </div>
 
@@ -546,6 +634,9 @@
         </div>
     </div>
 
+    <!-- Notification Toast -->
+    <div class="toast" id="toast">New message received</div>
+
     <script>
         // Your Firebase configuration
         const firebaseConfig = {
@@ -563,6 +654,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const storage = firebase.storage();
 
         // DOM Elements
         const authSection = document.getElementById('auth-section');
@@ -591,10 +683,14 @@
         const chatMessages = document.getElementById('chat-messages');
         const messageInput = document.getElementById('message-input');
         const sendMessageBtn = document.getElementById('send-message-btn');
+        const imageInput = document.getElementById('image-input');
+
+        const toast = document.getElementById('toast');
 
         let currentUser = null;
         let selectedFriendId = null;
         let chatUnsubscribe = null;
+        let unreadCounts = {}; // { friendId: count }
 
         // Authentication Form Submission (Login Only)
         authForm.addEventListener('submit', (e) => {
@@ -675,6 +771,7 @@
                     } else {
                         listAllUsers();
                         fetchFriendRequests();
+                        listenForNewMessages();
                     }
                 });
             } else {
@@ -688,6 +785,9 @@
                 }
                 chatHeader.innerHTML = '<span>Select a friend to start chatting.</span>';
                 chatMessages.innerHTML = '';
+                usersUl.innerHTML = '';
+                friendRequestsUl.innerHTML = '';
+                unreadCounts = {};
             }
         });
 
@@ -732,12 +832,13 @@
                     } else {
                         // Update the user's document with the new username
                         db.collection('users').doc(currentUser.uid).update({
-                            username: username
-                        })
+                                username: username
+                            })
                             .then(() => {
                                 usernameModal.classList.remove('active');
                                 listAllUsers();
                                 fetchFriendRequests();
+                                listenForNewMessages();
                             })
                             .catch((error) => {
                                 console.error('Error setting username:', error);
@@ -765,98 +866,120 @@
             usersUl.innerHTML = '';
             db.collection('users').get()
                 .then((querySnapshot) => {
+                    let users = [];
                     querySnapshot.forEach((doc) => {
                         const userData = doc.data();
                         if (doc.id !== currentUser.uid) { // Exclude current user
-                            // Check if already friends
-                            db.collection('users').doc(currentUser.uid).collection('friends').doc(doc.id).get()
-                                .then((friendDoc) => {
-                                    // Check if a friend request already sent or received
-                                    db.collection('friendRequests')
-                                        .where('from', '==', currentUser.uid)
-                                        .where('to', '==', doc.id)
-                                        .get()
-                                        .then((sentSnapshot) => {
-                                            db.collection('friendRequests')
-                                                .where('from', '==', doc.id)
-                                                .where('to', '==', currentUser.uid)
-                                                .get()
-                                                .then((receivedSnapshot) => {
-                                                    let buttonText = '';
-                                                    let buttonDisabled = false;
-                                                    let isFriend = false;
-                                                    if (friendDoc.exists) {
-                                                        buttonText = 'Friends';
-                                                        buttonDisabled = true;
-                                                        isFriend = true;
-                                                    } else if (!sentSnapshot.empty) {
-                                                        buttonText = 'Request Sent';
-                                                        buttonDisabled = true;
-                                                    } else if (!receivedSnapshot.empty) {
-                                                        buttonText = 'Respond to Request';
-                                                        buttonDisabled = false;
-                                                    } else {
-                                                        buttonText = 'Add Friend';
-                                                        buttonDisabled = false;
-                                                    }
-
-                                                    const li = document.createElement('li');
-
-                                                    const userInfoDiv = document.createElement('div');
-                                                    userInfoDiv.classList.add('user-info');
-
-                                                    const userImg = document.createElement('img');
-                                                    userImg.src = userData.photoURL || 'https://via.placeholder.com/40';
-                                                    userImg.alt = userData.username || 'No Name';
-
-                                                    const userNameSpan = document.createElement('span');
-                                                    userNameSpan.classList.add('user-name');
-                                                    userNameSpan.textContent = userData.username || 'No Name';
-
-                                                    userInfoDiv.appendChild(userImg);
-                                                    userInfoDiv.appendChild(userNameSpan);
-
-                                                    const actionBtn = document.createElement('button');
-
-                                                    if (isFriend) {
-                                                        actionBtn.textContent = 'Chat';
-                                                        actionBtn.classList.add('chat-btn');
-                                                        actionBtn.addEventListener('click', () => {
-                                                            selectFriend(doc.id, userData.username, userData.photoURL);
-                                                        });
-                                                    } else {
-                                                        actionBtn.textContent = buttonText;
-                                                        actionBtn.classList.add('send-request-btn');
-                                                        if (buttonDisabled) {
-                                                            actionBtn.disabled = true;
-                                                        }
-
-                                                        if (buttonText === 'Add Friend') {
-                                                            actionBtn.addEventListener('click', () => {
-                                                                sendFriendRequest(doc.id, userData.email);
-                                                            });
-                                                        } else if (buttonText === 'Respond to Request') {
-                                                            actionBtn.addEventListener('click', () => {
-                                                                respondToFriendRequest(doc.id, userData.username, userData.photoURL);
-                                                            });
-                                                        }
-                                                    }
-
-                                                    // Container for user info and buttons
-                                                    const userContainer = document.createElement('div');
-                                                    userContainer.style.display = 'flex';
-                                                    userContainer.style.alignItems = 'center';
-                                                    userContainer.style.width = '100%';
-
-                                                    userContainer.appendChild(userInfoDiv);
-                                                    userContainer.appendChild(actionBtn);
-
-                                                    li.appendChild(userContainer);
-                                                    usersUl.appendChild(li);
-                                                });
-                                        });
-                                });
+                            users.push({
+                                id: doc.id,
+                                ...userData
+                            });
                         }
+                    });
+                    // Now, sort users based on unread message counts
+                    users.sort((a, b) => (unreadCounts[b.id] || 0) - (unreadCounts[a.id] || 0));
+                    users.forEach((userData) => {
+                        const friendId = userData.id;
+                        // Check if already friends
+                        db.collection('users').doc(currentUser.uid).collection('friends').doc(friendId).get()
+                            .then((friendDoc) => {
+                                // Check if a friend request already sent or received
+                                db.collection('friendRequests')
+                                    .where('from', '==', currentUser.uid)
+                                    .where('to', '==', friendId)
+                                    .get()
+                                    .then((sentSnapshot) => {
+                                        db.collection('friendRequests')
+                                            .where('from', '==', friendId)
+                                            .where('to', '==', currentUser.uid)
+                                            .get()
+                                            .then((receivedSnapshot) => {
+                                                let buttonText = '';
+                                                let buttonDisabled = false;
+                                                let isFriend = false;
+                                                if (friendDoc.exists) {
+                                                    buttonText = 'Friends';
+                                                    buttonDisabled = true;
+                                                    isFriend = true;
+                                                } else if (!sentSnapshot.empty) {
+                                                    buttonText = 'Request Sent';
+                                                    buttonDisabled = true;
+                                                } else if (!receivedSnapshot.empty) {
+                                                    buttonText = 'Respond to Request';
+                                                    buttonDisabled = false;
+                                                } else {
+                                                    buttonText = 'Add Friend';
+                                                    buttonDisabled = false;
+                                                }
+
+                                                const li = document.createElement('li');
+
+                                                const userInfoDiv = document.createElement('div');
+                                                userInfoDiv.classList.add('user-info');
+
+                                                const userImg = document.createElement('img');
+                                                userImg.src = userData.photoURL || 'https://via.placeholder.com/40';
+                                                userImg.alt = userData.username || 'No Name';
+
+                                                const userNameSpan = document.createElement('span');
+                                                userNameSpan.classList.add('user-name');
+                                                userNameSpan.textContent = userData.username || 'No Name';
+
+                                                userInfoDiv.appendChild(userImg);
+                                                userInfoDiv.appendChild(userNameSpan);
+
+                                                // Badge for unread messages
+                                                const badge = document.createElement('span');
+                                                badge.classList.add('badge');
+                                                const count = unreadCounts[friendId] || 0;
+                                                if (count > 0) {
+                                                    badge.textContent = count > 5 ? '5+' : count;
+                                                    userNameSpan.appendChild(badge);
+                                                }
+
+                                                const actionBtn = document.createElement('button');
+
+                                                if (isFriend) {
+                                                    actionBtn.textContent = 'Chat';
+                                                    actionBtn.classList.add('chat-btn');
+                                                    actionBtn.addEventListener('click', () => {
+                                                        selectFriend(friendId, userData.username, userData.photoURL);
+                                                        // Reset unread count
+                                                        unreadCounts[friendId] = 0;
+                                                        listAllUsers();
+                                                    });
+                                                } else {
+                                                    actionBtn.textContent = buttonText;
+                                                    actionBtn.classList.add('send-request-btn');
+                                                    if (buttonDisabled) {
+                                                        actionBtn.disabled = true;
+                                                    }
+
+                                                    if (buttonText === 'Add Friend') {
+                                                        actionBtn.addEventListener('click', () => {
+                                                            sendFriendRequest(friendId, userData.email);
+                                                        });
+                                                    } else if (buttonText === 'Respond to Request') {
+                                                        actionBtn.addEventListener('click', () => {
+                                                            respondToFriendRequest(friendId, userData.username, userData.photoURL);
+                                                        });
+                                                    }
+                                                }
+
+                                                // Container for user info and buttons
+                                                const userContainer = document.createElement('div');
+                                                userContainer.style.display = 'flex';
+                                                userContainer.style.alignItems = 'center';
+                                                userContainer.style.width = '100%';
+
+                                                userContainer.appendChild(userInfoDiv);
+                                                userContainer.appendChild(actionBtn);
+
+                                                li.appendChild(userContainer);
+                                                usersUl.appendChild(li);
+                                            });
+                                    });
+                            });
                     });
                 })
                 .catch((error) => {
@@ -867,10 +990,10 @@
         // Send Friend Request
         function sendFriendRequest(friendId, friendEmail) {
             db.collection('friendRequests').add({
-                from: currentUser.uid,
-                to: friendId,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
+                    from: currentUser.uid,
+                    to: friendId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                })
                 .then(() => {
                     alert('Friend request sent!');
                     listAllUsers(); // Refresh the users list to update button state
@@ -1050,20 +1173,53 @@
             // Determine chat ID (sorted UIDs to ensure unique chat document)
             const chatId = currentUser.uid < friendId ? `${currentUser.uid}_${friendId}` : `${friendId}_${currentUser.uid}`;
 
-            // Listen for real-time updates to chat messages
+            function scrollToBottom() {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Ensure this is called after messages are added
             chatUnsubscribe = db.collection('chats').doc(chatId).collection('messages')
                 .orderBy('timestamp')
                 .onSnapshot((snapshot) => {
+                    const messages = []; // Array to store fetched messages
                     chatMessages.innerHTML = '';
+
                     snapshot.forEach((doc) => {
                         const msg = doc.data();
+                        messages.push({
+                            id: doc.id,
+                            ...msg
+                        }); // Store message ID for potential deletion
+
                         const messageDiv = document.createElement('div');
                         messageDiv.classList.add('message');
-                        messageDiv.innerHTML = `<span class="sender">${msg.sender === currentUser.uid ? 'You' : friendName}:</span> ${msg.message}`;
+
+                        if (msg.type === 'image') {
+                            messageDiv.innerHTML = `<span class="sender">${msg.sender === currentUser.uid ? 'You' : friendName}:</span> <br><img src="${msg.imageUrl}" alt="Image" />`;
+                        } else {
+                            messageDiv.innerHTML = `<span class="sender">${msg.sender === currentUser.uid ? 'You' : friendName}:</span> ${msg.message}`;
+                        }
+
                         chatMessages.appendChild(messageDiv);
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
                     });
+
+                    // Scroll to the bottom after rendering messages
+                    scrollToBottom();
+
+                    // Limit messages to the latest 20
+                    if (messages.length > 10) {
+                        const messagesToDelete = messages.slice(0, messages.length - 20); // Get messages to delete
+                        messagesToDelete.forEach((msg) => {
+                            db.collection('chats').doc(chatId).collection('messages').doc(msg.id).delete()
+                                .catch((error) => console.error('Error deleting old message:', error));
+                        });
+                    }
                 });
+
+            // Update lastRead timestamp
+            db.collection('users').doc(currentUser.uid).collection('lastRead').doc(friendId).set({
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
         }
 
         // Handle Send Message
@@ -1074,44 +1230,166 @@
             }
         });
 
+        imageInput.addEventListener('change', handleImageUpload);
+
         function sendMessage() {
             const messageText = messageInput.value.trim();
-            if (!messageText || !selectedFriendId) return;
+            if ((!messageText && !imageInput.files[0]) || !selectedFriendId) return;
 
             // Determine chat ID
             const chatId = currentUser.uid < selectedFriendId ? `${currentUser.uid}_${selectedFriendId}` : `${selectedFriendId}_${currentUser.uid}`;
 
-            // Add message to Firestore
-            db.collection('chats').doc(chatId).collection('messages').add({
-                sender: currentUser.uid,
-                message: messageText,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            })
+            if (messageText) {
+                // Add text message to Firestore
+                db.collection('chats').doc(chatId).collection('messages').add({
+                        sender: currentUser.uid,
+                        message: messageText,
+                        type: 'text',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    })
+                    .then(() => {
+                        messageInput.value = '';
+                        // Reset unread count
+                        unreadCounts[selectedFriendId] = 0;
+                        listAllUsers();
+                    })
+                    .catch((error) => {
+                        console.error('Error sending message:', error);
+                        alert('Error sending message.');
+                    });
+            }
+        }
+        const searchBar = document.getElementById('search-bar');
+
+        searchBar.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const userItems = document.querySelectorAll('.users-list li');
+
+            userItems.forEach((item) => {
+                const username = item.querySelector('.user-name').textContent.toLowerCase();
+                if (username.includes(query)) {
+                    item.style.display = 'flex'; // Show matching users
+                } else {
+                    item.style.display = 'none'; // Hide non-matching users
+                }
+            });
+        });
+
+        function handleImageUpload() {
+            const file = imageInput.files[0];
+            if (!file || !selectedFriendId) return;
+
+            const chatId = currentUser.uid < selectedFriendId ? `${currentUser.uid}_${selectedFriendId}` : `${selectedFriendId}_${currentUser.uid}`;
+            const storageRef = storage.ref();
+            const imageRef = storageRef.child(`chatImages/${chatId}/${Date.now()}_${file.name}`);
+
+            // Upload image to Firebase Storage
+            imageRef.put(file)
+                .then((snapshot) => snapshot.ref.getDownloadURL())
+                .then((downloadURL) => {
+                    // Add image message to Firestore
+                    return db.collection('chats').doc(chatId).collection('messages').add({
+                        sender: currentUser.uid,
+                        imageUrl: downloadURL,
+                        type: 'image',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
                 .then(() => {
-                    messageInput.value = '';
+                    imageInput.value = '';
+                    // Reset unread count
+                    unreadCounts[selectedFriendId] = 0;
+                    listAllUsers();
                 })
                 .catch((error) => {
-                    console.error('Error sending message:', error);
-                    alert('Error sending message.');
+                    console.error('Error uploading image:', error);
+                    alert('Error uploading image.');
                 });
         }
 
-        // Optional: Open Friend Request Modal (Not used in this implementation)
-        /*
-        sendFriendRequestBtn.addEventListener('click', () => {
-          friendRequestModal.classList.add('active');
+        // Listen for New Messages to Update Unread Counts
+        function listenForNewMessages() {
+            db.collection('chats').where('participants', 'array-contains', currentUser.uid).onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added' || change.type === 'modified') {
+                        const chatId = change.doc.id;
+                        const participants = chatId.split('_');
+                        const friendId = participants[0] === currentUser.uid ? participants[1] : participants[0];
+
+                        // Fetch last read timestamp
+                        db.collection('users').doc(currentUser.uid).collection('lastRead').doc(friendId).get()
+                            .then((doc) => {
+                                const lastRead = doc.exists ? doc.data().timestamp.toMillis() : 0;
+                                // Count unread messages
+                                db.collection('chats').doc(chatId).collection('messages')
+                                    .where('timestamp', '>', lastRead)
+                                    .get()
+                                    .then((messagesSnapshot) => {
+                                        const count = messagesSnapshot.size;
+                                        if (selectedFriendId !== friendId) { // Only count if not currently chatting
+                                            unreadCounts[friendId] = count;
+                                            listAllUsers();
+                                            // Show notification
+                                            if (count > 0) {
+                                                showToast(`New message from ${getUsername(friendId)}`);
+                                            }
+                                        }
+                                    });
+                            })
+                            .catch((error) => {
+                                console.error('Error fetching last read:', error);
+                            });
+                    }
+                });
+            });
+        }
+
+        // Helper Function to Get Username by ID
+        function getUsername(userId) {
+            // This is a placeholder. Ideally, maintain a local cache or fetch from Firestore.
+            // For simplicity, we'll return 'Friend' here.
+            return 'Friend';
+        }
+
+        // Show Toast Notification
+        function showToast(message) {
+            toast.textContent = message;
+            toast.className = "toast show";
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+
+        // Fetch and List All Users
+        function fetchAndListUsers() {
+            listAllUsers();
+        }
+
+        // Auto-Refresh Every 2 Seconds
+        // Reference the refresh button
+        const refreshButton = document.getElementById('refresh-button');
+
+        // Add a click event listener to refresh users and messages
+        refreshButton.addEventListener('click', () => {
+            // Fetch and list all users
+            listAllUsers();
+
+            // If a friend is selected, refresh their messages
+            if (selectedFriendId) {
+                selectFriend(selectedFriendId, friendName, friendPhotoURL); // Ensure these variables hold the selected friend's data
+            }
+            // Optional feedback
         });
 
-        closeFriendRequestModal.addEventListener('click', () => {
-          friendRequestModal.classList.remove('active');
-        });
 
-        sendFriendRequestForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const friendEmail = friendEmailInput.value.trim().toLowerCase();
-          // Implement sending friend request by email
-        });
-        */
+        // Fetch and List Users Initially
+        // Already handled in auth state listener
+
+        // Function to Handle Real-Time New Messages (Already partially handled)
+        // Additional Firestore listeners can be added if necessary
+
+        // Listen for New Messages for Notifications
+        // Already handled in listenForNewMessages()
     </script>
 </body>
 
