@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #007bff 0%, #6c757d 100%);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #212529;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      padding: 0;
+    }
+
+    #mainPage, #loginPage, #quizPage, #discoverPage, #playQuizPage, #editQuizPage {
+      display: none;
+      padding: 20px;
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin: 30px 0;
+      font-size: 3em;
+      letter-spacing: 1px;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      text-align: center;
+      color: #343a40;
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+
+    button, input[type="text"], input[type="email"], input[type="password"], select {
+      font-family: 'Poppins', sans-serif;
+      padding: 10px 15px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      width: 250px;
+      font-size: 1em;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 200px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    }
+
+    input, select {
+      background: #f8f9fa;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    #mainPage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #loginPage form, #quizPage form, #editQuizPage form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    #discoverPage {
+      text-align: center;
+    }
+
+    #quizzesContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .quiz {
+      background: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 10px;
+      padding: 20px;
+      width: 250px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quiz:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .quiz h3 {
+      margin-bottom: 10px;
+      color: #343a40;
+      font-size: 1.5em;
+    }
+
+    .quiz button {
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .question {
+      margin: 10px 0;
+      border: 1px solid #ced4da;
+      padding: 20px;
+      border-radius: 5px;
+      background: #fff;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    #playQuizPage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #quizTitle {
+      color: #343a40;
+      margin-bottom: 20px;
+    }
+
+    #quizQuestion {
+      font-size: 1.5em;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #optionsContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      background: #8b8282;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      font-size: 1em;
+      padding: 15px;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .option-btn.selected-correct {
+      background-color: #28a745 !important;
+      color: #fff;
+    }
+
+    .option-btn.selected-incorrect {
+      background-color: #dc3545 !important;
+      color: #fff;
+    }
+
+    .option-btn:hover {
+      background-color: #007bff;
+      color: white;
+      transform: scale(1.02);
+    }
+
+    #backToMainFromDiscover, #backToMainFromPost, #backToMainFromEdit {
+      background: #6c757d;
+      width: 200px;
+    }
+
+    #backToMainFromDiscover:hover, #backToMainFromPost:hover, #backToMainFromEdit:hover {
+      background: #5a6268;
+    }
+
+    #nextQuestionBtn {
+      background: #28a745;
+      width: 200px;
+    }
+
+    #nextQuestionBtn:hover {
+      background: #218838;
+    }
+
+    /* Result Section */
+    #resultContainer {
+      display: none;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      margin-top: 30px;
+    }
+
+    #resultScore {
+      font-size: 2em;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    #deleteBtn {
+      background: #dc3545;
+    }
+
+    #deleteBtn:hover {
+      background: #c82333;
+    }
+
+    /* Timer */
+    #timer {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #343a40;
+    }
+
+    /* Like/Dislike Buttons */
+    .rating-btn {
+      width: 100px;
+      background-color: #f8f9fa;
+      color: #343a40;
+      margin-top: 5px;
+    }
+
+    .rating-btn:hover {
+      background-color: #e2e6ea;
+    }
+
+    /* Wrong attempts summary */
+    #wrongSummary {
+      margin-top: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Quiz App</h1>
+
+  <!-- Main Page -->
+  <div id="mainPage">
+    <button id="discoverBtn">Discover Quizzes</button>
+    <button id="postBtn">Post a Quiz</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+  <!-- Login Page -->
+  <div id="loginPage">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login with Email</button>
+    </form>
+    <div style="display:flex; flex-direction:column; align-items:center; margin-top:10px;">
+      <button id="googleLoginBtn" style="background:#dc3545;">Login with Google</button>
+    </div>
+  </div>
+
+  <!-- Discover Page -->
+  <div id="discoverPage">
+    <h2>Discover Quizzes</h2>
+    <div id="quizzesContainer"></div>
+    <button id="backToMainFromDiscover">Back to Main</button>
+  </div>
+
+  <!-- Quiz Posting Page -->
+  <div id="quizPage">
+    <form id="postQuizForm">
+      <input type="text" id="quizTitle" placeholder="Quiz Title" required />
+      <label>Shuffle Questions? <input type="checkbox" id="shuffleQuestions"></label>
+      <label>Mode:
+        <select id="quizMode">
+          <option value="classic">Classic</option>
+          <option value="authorTimeShort">Time-based (Short: 5-60s)</option>
+          <option value="authorTimeLong">Time-based (Long: 30s-1800s)</option>
+          <option value="userSetTime">User Set Time (10min-30min)</option>
+        </select>
+      </label>
+      <label id="timeSettingLabel" style="display:none;">Time (seconds): <input type="number" id="timeInput" min="5" max="60" /></label>
+      <label id="longTimeSettingLabel" style="display:none;">Time (seconds, 30-1800): <input type="number" id="longTimeInput" min="30" max="1800" /></label>
+      <div id="questionsContainer">
+        <div class="question">
+          <input type="text" placeholder="Question" class="question-text" required />
+          <input type="text" placeholder="Option 1" class="option" required />
+          <input type="text" placeholder="Option 2" class="option" required />
+          <input type="text" placeholder="Option 3" class="option" required />
+          <input type="text" placeholder="Option 4" class="option" required />
+          <select class="correct-answer">
+            <option value="0">Correct Option 1</option>
+            <option value="1">Correct Option 2</option>
+            <option value="2">Correct Option 3</option>
+            <option value="3">Correct Option 4</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" id="addQuestionBtn">Add Question</button>
+      <button type="submit" id="postQuizBtn">Post Quiz</button>
+      <button id="backToMainFromPost" type="button">Back to Main</button>
+    </form>
+  </div>
+
+  <!-- Edit Quiz Page -->
+  <div id="editQuizPage">
+    <form id="editQuizForm">
+      <input type="text" id="editQuizTitle" placeholder="Quiz Title" required />
+      <label>Shuffle Questions? <input type="checkbox" id="editShuffleQuestions"></label>
+      <label>Mode:
+        <select id="editQuizMode">
+          <option value="classic">Classic</option>
+          <option value="authorTimeShort">Time-based (Short:5-60s)</option>
+          <option value="authorTimeLong">Time-based (Long:30-1800s)</option>
+          <option value="userSetTime">User Set Time(600-1800s)</option>
+        </select>
+      </label>
+      <label id="editTimeSettingLabel" style="display:none;">Time (s): <input type="number" id="editTimeInput" min="5" max="60" /></label>
+      <label id="editLongTimeSettingLabel" style="display:none;">Time (s,30-1800): <input type="number" id="editLongTimeInput" min="30" max="1800" /></label>
+      <div id="editQuestionsContainer"></div>
+      <button type="button" id="editAddQuestionBtn">Add Question</button>
+      <button type="submit" id="updateQuizBtn">Update Quiz</button>
+      <button id="backToMainFromEdit" type="button">Back to Main</button>
+    </form>
+  </div>
+
+  <!-- Play Quiz Page -->
+  <div id="playQuizPage">
+    <h2 id="quizTitle"></h2>
+    <div id="timer" style="display:none;">Time Left: <span id="timeLeft">60</span>s</div>
+    <div id="quizQuestion"></div>
+    <div id="optionsContainer"></div>
+    <button id="nextQuestionBtn" style="display: none;">Next Question</button>
+
+    <!-- Result Container -->
+    <div id="resultContainer">
+      <h2>Quiz Completed!</h2>
+      <div id="resultScore"></div>
+      <div id="wrongSummary"></div>
+      <button id="backToDiscoverFromResult">Back to Discover</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, getDoc, doc, query, orderBy, updateDoc, increment, deleteDoc, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+      authDomain: "signin-320c9.firebaseapp.com",
+      databaseURL: "https://signin-320c9-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "signin-320c9",
+      storageBucket: "signin-320c9.firebasestorage.app",
+      messagingSenderId: "1090838062436",
+      appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+      measurementId: "G-ZGWWRJJ43Y"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    const mainPage = document.getElementById("mainPage");
+    const loginPage = document.getElementById("loginPage");
+    const discoverPage = document.getElementById("discoverPage");
+    const quizPage = document.getElementById("quizPage");
+    const editQuizPage = document.getElementById("editQuizPage");
+    const playQuizPage = document.getElementById("playQuizPage");
+    const quizzesContainer = document.getElementById("quizzesContainer");
+    const questionsContainer = document.getElementById("questionsContainer");
+    const editQuestionsContainer = document.getElementById("editQuestionsContainer");
+
+    const discoverBtn = document.getElementById("discoverBtn");
+    const postBtn = document.getElementById("postBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const backToMainFromDiscover = document.getElementById("backToMainFromDiscover");
+    const backToMainFromPost = document.getElementById("backToMainFromPost");
+    const backToMainFromEdit = document.getElementById("backToMainFromEdit");
+    const quizTitleDisplay = document.getElementById("quizTitle");
+    const quizQuestionDisplay = document.getElementById("quizQuestion");
+    const optionsContainer = document.getElementById("optionsContainer");
+    const nextQuestionBtn = document.getElementById("nextQuestionBtn");
+    const resultContainer = document.getElementById("resultContainer");
+    const resultScore = document.getElementById("resultScore");
+    const backToDiscoverFromResult = document.getElementById("backToDiscoverFromResult");
+    const timerDiv = document.getElementById("timer");
+    const timeLeftSpan = document.getElementById("timeLeft");
+    const wrongSummaryDiv = document.getElementById("wrongSummary");
+
+    const quizTitleInput = document.getElementById("quizTitle");
+    const shuffleQuestionsInput = document.getElementById("shuffleQuestions");
+    const quizModeSelect = document.getElementById("quizMode");
+    const timeSettingLabel = document.getElementById("timeSettingLabel");
+    const timeInput = document.getElementById("timeInput");
+    const longTimeSettingLabel = document.getElementById("longTimeSettingLabel");
+    const longTimeInput = document.getElementById("longTimeInput");
+
+    const editQuizTitleInput = document.getElementById("editQuizTitle");
+    const editShuffleQuestionsInput = document.getElementById("editShuffleQuestions");
+    const editQuizModeSelect = document.getElementById("editQuizMode");
+    const editTimeSettingLabel = document.getElementById("editTimeSettingLabel");
+    const editTimeInput = document.getElementById("editTimeInput");
+    const editLongTimeSettingLabel = document.getElementById("editLongTimeSettingLabel");
+    const editLongTimeInput = document.getElementById("editLongTimeInput");
+
+    let currentQuiz = null;
+    let currentQuizId = null;
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let currentUser = null;
+    let userRatings = {};
+    let timerInterval = null;
+    let timeRemaining = 0;
+
+    // Track wrong attempts: {questionIndex: count}
+    let wrongAttempts = {};
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        loginPage.style.display = "none";
+        mainPage.style.display = "block";
+      } else {
+        mainPage.style.display = "none";
+        loginPage.style.display = "block";
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+    });
+
+    // Login with Email
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        alert("Login failed: " + error.message);
+      }
+    });
+
+    // Login with Google
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (error) {
+        alert("Google login failed: " + error.message);
+      }
+    });
+
+    // Rating System
+    async function fetchUserRatings() {
+      if (!currentUser) return;
+      const ratingsSnap = await getDocs(collection(db, "ratings"));
+      userRatings = {};
+      ratingsSnap.forEach((ratingDoc) => {
+        const data = ratingDoc.data();
+        if (data.user === currentUser.uid) {
+          userRatings[data.quizId] = data.value;
+        }
+      });
+    }
+
+    // Display Quizzes
+    async function displayQuizzes() {
+      const quizQuery = query(collection(db, "quizzes"), orderBy("createdAt", "desc"));
+      const quizSnapshots = await getDocs(quizQuery);
+
+      quizzesContainer.innerHTML = "";
+      for (let quizDoc of quizSnapshots.docs) {
+        const quiz = quizDoc.data();
+        const quizId = quizDoc.id;
+
+        const plays = quiz.plays || 0;
+        const likes = quiz.likes || 0;
+        const dislikes = quiz.dislikes || 0;
+
+        const quizDiv = document.createElement("div");
+        quizDiv.classList.add("quiz");
+        let htmlContent = `<h3>${quiz.title}</h3>
+                           <p>Played: ${plays} time(s)</p>
+                           <p>Likes: ${likes} | Dislikes: ${dislikes}</p>
+                           <button onclick="startQuiz('${quizId}')">Play Quiz</button>`;
+
+        if (currentUser && currentUser.email === quiz.author) {
+          htmlContent += `<button onclick="editQuiz('${quizId}')">Edit Quiz</button>`;
+          htmlContent += `<button id="deleteBtn" onclick="deleteQuiz('${quizId}')">Delete Quiz</button>`;
+        }
+
+        const userRating = userRatings[quizId] || null;
+        // If user clicks like and already liked: remove like
+        // If user clicks dislike and already disliked: remove dislike
+        htmlContent += `
+          <button class="rating-btn" onclick="rateQuiz('${quizId}', 'like')">${userRating==='like'?'Unlike':'Like'}</button>
+          <button class="rating-btn" onclick="rateQuiz('${quizId}', 'dislike')">${userRating==='dislike'?'Undislike':'Dislike'}</button>
+        `;
+
+        quizDiv.innerHTML = htmlContent;
+        quizzesContainer.appendChild(quizDiv);
+      }
+    }
+
+    // Rate Quiz
+    window.rateQuiz = async (quizId, value) => {
+      if (!currentUser) {
+        alert("Please login to rate the quiz.");
+        return;
+      }
+
+      const ratingDocId = quizId + "_" + currentUser.uid;
+      const ratingRef = doc(db, "ratings", ratingDocId);
+      const ratingSnap = await getDoc(ratingRef);
+      const quizRef = doc(db, "quizzes", quizId);
+
+      if (ratingSnap.exists()) {
+        // User has rated before
+        const prevValue = ratingSnap.data().value;
+        if (prevValue === value) {
+          // Same rating clicked again => remove rating
+          await deleteDoc(ratingRef);
+          if (value === 'like') {
+            await updateDoc(quizRef, { likes: increment(-1) });
+          } else {
+            await updateDoc(quizRef, { dislikes: increment(-1) });
+          }
+          delete userRatings[quizId];
+        } else {
+          // Different rating => remove old rating, add new one
+          // First remove old rating effect
+          if (prevValue === 'like') {
+            await updateDoc(quizRef, { likes: increment(-1) });
+          } else {
+            await updateDoc(quizRef, { dislikes: increment(-1) });
+          }
+          // Now add new rating
+          await setDoc(ratingRef, { quizId, user: currentUser.uid, value });
+          if (value === 'like') {
+            await updateDoc(quizRef, { likes: increment(1) });
+          } else {
+            await updateDoc(quizRef, { dislikes: increment(1) });
+          }
+          userRatings[quizId] = value;
+        }
+      } else {
+        // No rating before
+        await setDoc(ratingRef, { quizId, user: currentUser.uid, value });
+        if (value === 'like') {
+          await updateDoc(quizRef, { likes: increment(1) });
+        } else {
+          await updateDoc(quizRef, { dislikes: increment(1) });
+        }
+        userRatings[quizId] = value;
+      }
+
+      displayQuizzes();
+    };
+
+    // Discover Quizzes
+    discoverBtn.addEventListener("click", async () => {
+      await fetchUserRatings();
+      mainPage.style.display = "none";
+      discoverPage.style.display = "block";
+      displayQuizzes();
+    });
+
+    // Delete Quiz
+    window.deleteQuiz = async (quizId) => {
+      const confirmed = confirm("Are you sure you want to delete this quiz?");
+      if (confirmed) {
+        await deleteDoc(doc(db, "quizzes", quizId));
+        alert("Quiz deleted successfully!");
+        displayQuizzes();
+      }
+    };
+
+    // Mode selection UI
+    quizModeSelect.addEventListener("change", () => {
+      handleModeUI(quizModeSelect.value, timeSettingLabel, timeInput, longTimeSettingLabel, longTimeInput);
+    });
+    editQuizModeSelect.addEventListener("change", () => {
+      handleModeUI(editQuizModeSelect.value, editTimeSettingLabel, editTimeInput, editLongTimeSettingLabel, editLongTimeInput);
+    });
+
+    function handleModeUI(mode, shortLabel, shortInput, longLabel, longInput) {
+      shortLabel.style.display = "none";
+      longLabel.style.display = "none";
+      if (mode === 'authorTimeShort') {
+        shortLabel.style.display = "block";
+      } else if (mode === 'authorTimeLong') {
+        longLabel.style.display = "block";
+      }
+    }
+
+    // Post a Quiz
+    postBtn.addEventListener("click", () => {
+      mainPage.style.display = "none";
+      quizPage.style.display = "block";
+    });
+
+    // Add Question
+    document.getElementById("addQuestionBtn").addEventListener("click", () => {
+      addQuestionBlock(questionsContainer);
+    });
+
+    function addQuestionBlock(container) {
+      const questionDiv = document.createElement("div");
+      questionDiv.classList.add("question");
+      questionDiv.innerHTML = `
+        <input type="text" placeholder="Question" class="question-text" required />
+        <input type="text" placeholder="Option 1" class="option" required />
+        <input type="text" placeholder="Option 2" class="option" required />
+        <input type="text" placeholder="Option 3" class="option" required />
+        <input type="text" placeholder="Option 4" class="option" required />
+        <select class="correct-answer">
+          <option value="0">Correct Option 1</option>
+          <option value="1">Correct Option 2</option>
+          <option value="2">Correct Option 3</option>
+          <option value="3">Correct Option 4</option>
+        </select>
+      `;
+      container.appendChild(questionDiv);
+    }
+
+    // Post Quiz Submit
+    document.getElementById("postQuizForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = quizTitleInput.value;
+      const mode = quizModeSelect.value;
+      const questions = collectQuestions("#questionsContainer");
+
+      let quizData = {
+        title,
+        questions,
+        shuffle: shuffleQuestionsInput.checked,
+        mode,
+        author: auth.currentUser.email,
+        createdAt: new Date(),
+        plays: 0,
+        likes: 0,
+        dislikes: 0
+      };
+
+      if (mode === 'authorTimeShort') {
+        const t = parseInt(timeInput.value);
+        if (isNaN(t) || t < 5 || t > 60) {
+          return alert("Time must be between 5 and 60 seconds.");
+        }
+        quizData.timeLimit = t; // short limit in seconds
+      } else if (mode === 'authorTimeLong') {
+        const lt = parseInt(longTimeInput.value);
+        if (isNaN(lt) || lt < 30 || lt > 1800) {
+          return alert("Time must be between 30 and 1800 seconds.");
+        }
+        quizData.entireQuizTime = lt; // long limit in seconds
+      }
+
+      await addDoc(collection(db, "quizzes"), quizData);
+      alert("Quiz posted successfully!");
+      quizPage.style.display = "none";
+      mainPage.style.display = "block";
+    });
+
+    function collectQuestions(selector) {
+      const questionElements = document.querySelectorAll(selector + " .question");
+      return Array.from(questionElements).map((q) => ({
+        question: q.querySelector(".question-text").value,
+        options: Array.from(q.querySelectorAll(".option")).map((opt) => opt.value),
+        correctAnswer: parseInt(q.querySelector(".correct-answer").value),
+      }));
+    }
+
+    // Edit Quiz
+    window.editQuiz = async (quizId) => {
+      currentQuizId = quizId;
+      const quizDocSnap = await getDoc(doc(db, "quizzes", quizId));
+      if (!quizDocSnap.exists()) return;
+      const quiz = quizDocSnap.data();
+
+      editQuestionsContainer.innerHTML = '';
+      editQuizTitleInput.value = quiz.title;
+      editShuffleQuestionsInput.checked = !!quiz.shuffle;
+      editQuizModeSelect.value = quiz.mode || "classic";
+
+      handleModeUI(quiz.mode, editTimeSettingLabel, editTimeInput, editLongTimeSettingLabel, editLongTimeInput);
+
+      if (quiz.mode === 'authorTimeShort') {
+        editTimeInput.value = quiz.timeLimit || '';
+      } else if (quiz.mode === 'authorTimeLong') {
+        editLongTimeInput.value = quiz.entireQuizTime || '';
+      }
+
+      quiz.questions.forEach((q) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.classList.add("question");
+        questionDiv.innerHTML = `
+          <input type="text" placeholder="Question" class="question-text" value="${q.question}" required />
+          <input type="text" placeholder="Option 1" class="option" value="${q.options[0]}" required />
+          <input type="text" placeholder="Option 2" class="option" value="${q.options[1]}" required />
+          <input type="text" placeholder="Option 3" class="option" value="${q.options[2]}" required />
+          <input type="text" placeholder="Option 4" class="option" value="${q.options[3]}" required />
+          <select class="correct-answer">
+            <option value="0" ${q.correctAnswer===0?'selected':''}>Correct Option 1</option>
+            <option value="1" ${q.correctAnswer===1?'selected':''}>Correct Option 2</option>
+            <option value="2" ${q.correctAnswer===2?'selected':''}>Correct Option 3</option>
+            <option value="3" ${q.correctAnswer===3?'selected':''}>Correct Option 4</option>
+          </select>
+        `;
+        editQuestionsContainer.appendChild(questionDiv);
+      });
+
+      mainPage.style.display = "none";
+      discoverPage.style.display = "none";
+      editQuizPage.style.display = "block";
+    };
+
+    // Add question in Edit
+    document.getElementById("editAddQuestionBtn").addEventListener("click", () => {
+      addQuestionBlock(editQuestionsContainer);
+    });
+
+    // Update Quiz
+    document.getElementById("editQuizForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = editQuizTitleInput.value;
+      const mode = editQuizModeSelect.value;
+      const questions = collectQuestions("#editQuestionsContainer");
+
+      let updates = {
+        title,
+        questions,
+        shuffle: editShuffleQuestionsInput.checked,
+        mode
+      };
+
+      if (mode === 'authorTimeShort') {
+        const t = parseInt(editTimeInput.value);
+        if (isNaN(t) || t < 5 || t > 60) return alert("Time must be 5-60 seconds");
+        updates.timeLimit = t;
+        updates.entireQuizTime = deleteField();
+      } else if (mode === 'authorTimeLong') {
+        const lt = parseInt(editLongTimeInput.value);
+        if (isNaN(lt) || lt < 30 || lt > 1800) return alert("Time must be 30-1800 seconds");
+        updates.entireQuizTime = lt;
+        updates.timeLimit = deleteField();
+      } else {
+        updates.timeLimit = deleteField();
+        updates.entireQuizTime = deleteField();
+      }
+
+      await updateDoc(doc(db, "quizzes", currentQuizId), updates);
+      alert("Quiz updated successfully!");
+      editQuizPage.style.display = "none";
+      mainPage.style.display = "block";
+    });
+
+    // Start Quiz
+    window.startQuiz = async (quizId) => {
+      const quizDocSnap = await getDoc(doc(db, "quizzes", quizId));
+      if (quizDocSnap.exists()) {
+        currentQuiz = quizDocSnap.data();
+        currentQuizId = quizId;
+        currentQuestionIndex = 0;
+        score = 0;
+        wrongAttempts = {};
+
+        // If userSetTime mode, ask user for time
+        if (currentQuiz.mode === "userSetTime") {
+          let userTimeMin = prompt("Enter time in minutes (10-30):");
+          let userTime = parseInt(userTimeMin);
+          if (isNaN(userTime) || userTime < 10 || userTime > 30) {
+            alert("Invalid time. Defaulting to 10 minutes.");
+            userTime = 10;
+          }
+          currentQuiz.userSetTime = userTime * 60; // convert to seconds
+        }
+
+        if (currentQuiz.shuffle) {
+          currentQuiz.questions = currentQuiz.questions.sort(() => Math.random() - 0.5);
+        }
+
+        discoverPage.style.display = "none";
+        editQuizPage.style.display = "none";
+        playQuizPage.style.display = "block";
+        resultContainer.style.display = "none";
+
+        quizQuestionDisplay.style.display = "block";
+        optionsContainer.style.display = "flex";
+        nextQuestionBtn.style.display = "none";
+
+        setTimerForMode(currentQuiz.mode);
+
+        displayQuestion();
+      }
+    };
+
+    function setTimerForMode(mode) {
+      clearInterval(timerInterval);
+      timerDiv.style.display = "none";
+
+      if (mode === "authorTimeShort") {
+        timeRemaining = currentQuiz.timeLimit;
+        startTimer();
+      } else if (mode === "authorTimeLong") {
+        timeRemaining = currentQuiz.entireQuizTime;
+        startTimer();
+      } else if (mode === "userSetTime") {
+        timeRemaining = currentQuiz.userSetTime;
+        startTimer();
+      }
+      // Classic mode - no timer
+    }
+
+    function startTimer() {
+      if (timeRemaining > 0) {
+        timerDiv.style.display = "block";
+        timeLeftSpan.innerText = timeRemaining;
+        timerInterval = setInterval(() => {
+          timeRemaining--;
+          timeLeftSpan.innerText = timeRemaining;
+          if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            showResults();
+          }
+        }, 1000);
+      }
+    }
+
+    // Display Question
+    function displayQuestion() {
+      const question = currentQuiz.questions[currentQuestionIndex];
+      quizTitleDisplay.innerText = currentQuiz.title;
+      quizQuestionDisplay.innerText = question.question;
+
+      optionsContainer.innerHTML = "";
+      question.options.forEach((option, index) => {
+        const optionBtn = document.createElement("button");
+        optionBtn.classList.add("option-btn");
+        optionBtn.innerText = option;
+        optionBtn.onclick = () => checkAnswer(index, optionBtn);
+        optionsContainer.appendChild(optionBtn);
+      });
+
+      // In classic mode or authorTimeShort/Long where we go question by question:
+      if (currentQuiz.mode === 'classic' || currentQuiz.mode === 'authorTimeShort' || currentQuiz.mode === 'authorTimeLong') {
+        nextQuestionBtn.style.display = "none";
+      }
+    }
+
+    // Check Answer
+    function checkAnswer(selectedIndex, btn) {
+      const question = currentQuiz.questions[currentQuestionIndex];
+      const correctIndex = question.correctAnswer;
+
+      const allOptions = optionsContainer.querySelectorAll(".option-btn");
+      allOptions.forEach(o => o.disabled = true);
+
+      if (selectedIndex === correctIndex) {
+        score++;
+        btn.classList.add("selected-correct");
+      } else {
+        btn.classList.add("selected-incorrect");
+        // track wrong attempt
+        wrongAttempts[currentQuestionIndex] = (wrongAttempts[currentQuestionIndex] || 0) + 1;
+      }
+
+      // For classic or authorTimeShort/Long: show next button after delay
+      if (currentQuiz.mode === 'classic' || currentQuiz.mode === 'authorTimeShort' || currentQuiz.mode === 'authorTimeLong') {
+        setTimeout(() => {
+          nextQuestionBtn.style.display = "block";
+        }, 500);
+      } else if (currentQuiz.mode === 'userSetTime') {
+        // userSetTime mode: loop questions infinitely until timer ends
+        setTimeout(() => {
+          nextQuestionUserSetTime();
+        }, 500);
+      }
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < currentQuiz.questions.length) {
+        displayQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    // For userSetTime mode, loop infinitely
+    function nextQuestionUserSetTime() {
+      currentQuestionIndex = (currentQuestionIndex + 1) % currentQuiz.questions.length;
+      if (timeRemaining <= 0) {
+        showResults();
+      } else {
+        displayQuestion();
+      }
+    }
+
+    // Next Question (For classic and authorTime modes)
+    nextQuestionBtn.addEventListener("click", () => {
+      nextQuestion();
+    });
+
+    function showResults() {
+      quizQuestionDisplay.style.display = "none";
+      optionsContainer.style.display = "none";
+      nextQuestionBtn.style.display = "none";
+      resultContainer.style.display = "block";
+      timerDiv.style.display = "none";
+      clearInterval(timerInterval);
+
+      updateDoc(doc(db, "quizzes", currentQuizId), {
+        plays: increment(1)
+      });
+
+      resultScore.innerText = `Your Score: ${score} / ${currentQuiz.questions.length}`;
+
+      // Show wrong attempts summary
+      let summaryHtml = "<h3>Wrong Attempts Summary</h3>";
+      let anyWrong = false;
+      for (let idx in wrongAttempts) {
+        anyWrong = true;
+        const q = currentQuiz.questions[idx];
+        summaryHtml += `<p>Question: ${q.question}<br>Wrong Attempts: ${wrongAttempts[idx]}</p>`;
+      }
+      if (!anyWrong) {
+        summaryHtml += "<p>You got all questions correct!</p>";
+      }
+      wrongSummaryDiv.innerHTML = summaryHtml;
+    }
+
+    // Back from result to discover
+    backToDiscoverFromResult.addEventListener("click", () => {
+      playQuizPage.style.display = "none";
+      discoverPage.style.display = "block";
+      displayQuizzes();
+    });
+
+    // Back to Main
+    backToMainFromDiscover.addEventListener("click", () => {
+      discoverPage.style.display = "none";
+      mainPage.style.display = "block";
+    });
+
+    backToMainFromPost.addEventListener("click", () => {
+      quizPage.style.display = "none";
+      mainPage.style.display = "block";
+    });
+
+    backToMainFromEdit.addEventListener("click", () => {
+      editQuizPage.style.display = "none";
+      mainPage.style.display = "block";
+    });
+  </script>
+</body>
+</html>
