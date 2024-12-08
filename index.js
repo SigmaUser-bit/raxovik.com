@@ -222,32 +222,3 @@ leaveButton.addEventListener("click", () => {
     textDiv.textContent = "Welcome! Please join or create a meeting.";
   }
 });
-// Toggle Microphone Event Listener
-toggleMicButton.addEventListener("click", () => {
-  if (meeting && meeting.localParticipant) {
-    isMicOn = !isMicOn; // Toggle the mic state
-
-    if (isMicOn) {
-      meeting.localParticipant.toggleMicrophone(true);
-      console.log("Microphone turned ON");
-    } else {
-      meeting.localParticipant.toggleMicrophone(false);
-      console.log("Microphone turned OFF");
-    }
-  }
-});
-
-// Toggle Webcam Event Listener
-toggleWebCamButton.addEventListener("click", () => {
-  if (meeting && meeting.localParticipant) {
-    isWebCamOn = !isWebCamOn; // Toggle the webcam state
-
-    if (isWebCamOn) {
-      meeting.localParticipant.toggleWebcam(true);
-      console.log("Webcam turned ON");
-    } else {
-      meeting.localParticipant.toggleWebcam(false);
-      console.log("Webcam turned OFF");
-    }
-  }
-});
