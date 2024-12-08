@@ -1,253 +1,199 @@
-// Getting Elements from DOM
-const joinButton = document.getElementById("joinBtn");
-const leaveButton = document.getElementById("leaveBtn");
-const toggleMicButton = document.getElementById("toggleMicBtn");
-const toggleWebCamButton = document.getElementById("toggleWebCamBtn");
-const createButton = document.getElementById("createMeetingBtn");
-const videoContainer = document.getElementById("videoContainer");
-const textDiv = document.getElementById("textDiv");
-const lobbyWebcamPreview = document.getElementById("lobbyWebcamPreview");
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* General Body Styling */
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 20px;
+      }
 
-// Declare Variables
-let meeting = null;
-let meetingId = "";
-let isMicOn = false;
-let isWebCamOn = false;
+      /* Container for the join screen */
+      #join-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 100%;
+        max-width: 400px;
+      }
 
-// Webcam Preview Functions
-function startLobbyWebcamPreview() {
-  navigator.mediaDevices
-    .getUserMedia({ video: true })
-    .then((stream) => {
-      lobbyWebcamPreview.srcObject = stream;
-    })
-    .catch((error) => {
-      console.error("Error accessing webcam:", error);
-    });
-}
+      /* Buttons */
+      button {
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        margin: 10px 0;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+      }
 
-function stopLobbyWebcamPreview() {
-  const stream = lobbyWebcamPreview.srcObject;
-  if (stream) {
-    stream.getTracks().forEach((track) => track.stop());
-    lobbyWebcamPreview.srcObject = null;
-  }
-}
+      button:hover {
+        background-color: #0056b3;
+      }
 
-// Initialize Meeting
-function initializeMeeting() {
-  try {
-    // Get the username from the input field
-    const username = document.getElementById('usernameTxt').value.trim();
+      button:focus {
+        outline: none;
+      }
 
-    if (username === '') {
-      alert('Please enter a username.');
-      return;
-    }
+      /* Input fields */
+      #meetingIdTxt, #usernameTxt {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
 
-    window.VideoSDK.config(TOKEN);
+      /* Text container */
+      #textDiv {
+        margin: 20px 0;
+        font-size: 18px;
+        color: #333;
+      }
 
-    meeting = window.VideoSDK.initMeeting({
-      meetingId, // required
-      name: username, // Use the input username as the participant's name
-      micEnabled: true, // optional, default: true
-      webcamEnabled: true, // optional, default: true
-    });
+      /* Video container */
+      #videoContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+      }
 
-    if (!meeting) throw new Error("Failed to initialize the meeting.");
+      /* Individual video frame */
+      .video-frame {
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        overflow: hidden;
+        width: 300px;
+        background-color: #000;
+        position: relative;
+      }
 
-    meeting.join();
+      /* Display name styling */
+      .video-frame div {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        text-align: center;
+        background-color: rgba(0, 123, 255, 0.7);
+        color: #ffffff;
+        padding: 5px;
+      }
 
-    createLocalParticipant();
+      /* Grid screen styling */
+      #grid-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 100%;
+        max-width: 800px;
+        margin-top: 20px;
+      }
 
-    meeting.localParticipant.on("stream-enabled", (stream) => {
-      setTrack(stream, null, meeting.localParticipant, true);
-    });
+      /* Controller buttons */
+      #grid-screen button {
+        width: 150px;
+        margin: 5px;
+        font-size: 14px;
+        background-color: #28a745;
+      }
 
-    meeting.on("meeting-joined", () => {
-      textDiv.style.display = "none";
-      document.getElementById("grid-screen").style.display = "block";
-      document.getElementById(
-        "meetingIdHeading"
-      ).textContent = `Meeting Id: ${meetingId}`;
-    });
+      #grid-screen button:hover {
+        background-color: #218838;
+      }
 
-    meeting.on("meeting-left", () => {
-      videoContainer.innerHTML = "";
-    });
+      /* Heading for the meeting ID */
+      #meetingIdHeading {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="join-screen">
+      <!-- Input for username -->
+      <input type="text" id="usernameTxt" placeholder="Enter your username" />
 
-    meeting.on("participant-joined", (participant) => {
-      let videoElement = createVideoElement(participant.id, participant.displayName);
-      let audioElement = createAudioElement(participant.id);
+      <!-- Webcam preview -->
+      <video id="lobbyWebcamPreview" autoplay playsinline muted style="width: 100%; border: 2px solid #ccc; border-radius: 8px; margin-bottom: 10px;"></video>
+    
+      <!-- Create new Meeting Button -->
+      <button id="createMeetingBtn">New Meeting</button>
+      OR
+      <!-- Join existing Meeting -->
+      <input type="text" id="meetingIdTxt" placeholder="Enter Meeting id" />
+      <button id="joinBtn">Join Meeting</button>
+    </div>
+    
+    <!-- for Managing meeting status -->
+    <div id="textDiv"></div>
 
-      participant.on("stream-enabled", (stream) => {
-        setTrack(stream, audioElement, participant, false);
+    <div id="grid-screen" style="display: none">
+      <!-- To Display MeetingId -->
+      <h3 id="meetingIdHeading"></h3>
+
+      <!-- Controllers -->
+      <button id="leaveBtn">Leave</button>
+      <button id="toggleMicBtn">Toggle Mic</button>
+      <button id="toggleWebCamBtn">Toggle WebCam</button>
+
+      <!-- render Video -->
+      <div class="row" id="videoContainer"></div>
+    </div>
+
+    <!-- Add VideoSDK script -->
+    <script src="https://sdk.videosdk.live/js-sdk/0.0.86/videosdk.js"></script>
+    <script src="config.js"></script>
+    <script src="index.js"></script>
+
+    <script>
+      document.getElementById('createMeetingBtn').addEventListener('click', () => {
+        const username = document.getElementById('usernameTxt').value.trim();
+        if (username === '') {
+          alert('Please enter a username.');
+          return;
+        }
+        // Set the username for the video stream (this part depends on your video SDK integration)
+        console.log('Username:', username);
+        // Proceed to create a new meeting
       });
 
-      videoContainer.appendChild(videoElement);
-      videoContainer.appendChild(audioElement);
-    });
-
-    meeting.on("participant-left", (participant) => {
-      document.getElementById(`f-${participant.id}`)?.remove();
-      document.getElementById(`a-${participant.id}`)?.remove();
-    });
-  } catch (error) {
-    console.error("Error initializing meeting:", error);
-  }
-}
-
-// Create Video Element
-function createVideoElement(pId, name) {
-  let videoFrame = document.createElement("div");
-  videoFrame.setAttribute("id", `f-${pId}`);
-
-  let videoElement = document.createElement("video");
-  videoElement.classList.add("video-frame");
-  videoElement.setAttribute("id", `v-${pId}`);
-  videoElement.setAttribute("playsinline", true);
-  videoElement.setAttribute("width", "300");
-  videoFrame.appendChild(videoElement);
-
-  let displayName = document.createElement("div");
-  displayName.innerHTML = `Name: ${name}`;
-  videoFrame.appendChild(displayName);
-
-  return videoFrame;
-}
-
-// Create Audio Element
-function createAudioElement(pId) {
-  let audioElement = document.createElement("audio");
-  audioElement.setAttribute("autoplay", "false");
-  audioElement.setAttribute("playsinline", "true");
-  audioElement.setAttribute("controls", "false");
-  audioElement.setAttribute("id", `a-${pId}`);
-  audioElement.style.display = "none";
-  return audioElement;
-}
-
-// Create Local Participant
-function createLocalParticipant() {
-  let localParticipant = createVideoElement(
-    meeting.localParticipant.id,
-    meeting.localParticipant.displayName
-  );
-  videoContainer.appendChild(localParticipant);
-}
-
-// Set Track
-function setTrack(stream, audioElement, participant, isLocal) {
-  if (stream.kind === "video") {
-    isWebCamOn = true;
-    const mediaStream = new MediaStream();
-    mediaStream.addTrack(stream.track);
-    let videoElm = document.getElementById(`v-${participant.id}`);
-    videoElm.srcObject = mediaStream;
-    videoElm.play().catch((error) =>
-      console.error("videoElm.current.play() failed", error)
-    );
-  } else if (stream.kind === "audio" && !isLocal) {
-    const mediaStream = new MediaStream();
-    mediaStream.addTrack(stream.track);
-    audioElement.srcObject = mediaStream;
-    audioElement.play().catch((error) =>
-      console.error("audioElm.play() failed", error)
-    );
-  }
-}
-
-// Event Listeners
-joinButton.addEventListener("click", async () => {
-  stopLobbyWebcamPreview();
-  document.getElementById("join-screen").style.display = "none";
-  textDiv.textContent = "Joining the meeting...";
-
-  meetingId = document.getElementById("meetingIdTxt").value;
-  initializeMeeting();
-});
-
-createButton.addEventListener("click", async () => {
-  stopLobbyWebcamPreview();
-  document.getElementById("join-screen").style.display = "none";
-  textDiv.textContent = "Please wait, we are joining the meeting";
-
-  try {
-    const url = `https://api.videosdk.live/v2/rooms`;
-    const options = {
-      method: "POST",
-      headers: { Authorization: TOKEN, "Content-Type": "application/json" },
-    };
-
-    const { roomId } = await fetch(url, options).then((response) =>
-      response.json()
-    );
-    meetingId = roomId;
-    initializeMeeting();
-  } catch (error) {
-    console.error("Error creating meeting:", error);
-    alert("Failed to create a meeting.");
-  }
-});
-
-// Start Webcam Preview on Load
-startLobbyWebcamPreview();
-// Leave Meeting Button Event Listener
-leaveButton.addEventListener("click", () => {
-  if (meeting) {
-    // Leave the meeting
-    meeting.leave();
-
-    // Clean up meeting UI
-    videoContainer.innerHTML = "";
-
-    // Reset the meeting state
-    meeting = null;
-    meetingId = "";
-
-    // Stop any active media tracks
-    const lobbyStream = lobbyWebcamPreview.srcObject;
-    if (lobbyStream) {
-      lobbyStream.getTracks().forEach((track) => track.stop());
-    }
-
-    // Start the webcam preview for the lobby again
-    startLobbyWebcamPreview();
-
-    // Show the lobby screen
-    document.getElementById("grid-screen").style.display = "none";
-    document.getElementById("join-screen").style.display = "block";
-
-    // Reset the text div
-    textDiv.textContent = "Welcome! Please join or create a meeting.";
-  }
-});
-// Toggle Microphone Event Listener
-toggleMicButton.addEventListener("click", () => {
-  if (meeting && meeting.localParticipant) {
-    isMicOn = !isMicOn; // Toggle the mic state
-
-    if (isMicOn) {
-      meeting.localParticipant.toggleMicrophone(true);
-      console.log("Microphone turned ON");
-    } else {
-      meeting.localParticipant.toggleMicrophone(false);
-      console.log("Microphone turned OFF");
-    }
-  }
-});
-
-// Toggle Webcam Event Listener
-toggleWebCamButton.addEventListener("click", () => {
-  if (meeting && meeting.localParticipant) {
-    isWebCamOn = !isWebCamOn; // Toggle the webcam state
-
-    if (isWebCamOn) {
-      meeting.localParticipant.toggleWebcam(true);
-      console.log("Webcam turned ON");
-    } else {
-      meeting.localParticipant.toggleWebcam(false);
-      console.log("Webcam turned OFF");
-    }
-  }
-});
+      document.getElementById('joinBtn').addEventListener('click', () => {
+        const username = document.getElementById('usernameTxt').value.trim();
+        if (username === '') {
+          alert('Please enter a username.');
+          return;
+        }
+        const meetingId = document.getElementById('meetingIdTxt').value.trim();
+        if (meetingId === '') {
+          alert('Please enter a meeting ID.');
+          return;
+        }
+        // Set the username for the video stream (this part depends on your video SDK integration)
+        console.log('Username:', username);
+        console.log('Meeting ID:', meetingId);
+        // Proceed to join the meeting
+      });
+    </script>
+  </body>
+</html>
