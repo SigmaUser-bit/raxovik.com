@@ -373,6 +373,7 @@ footer a:hover {
                 newsItem.innerHTML = `
                     <h3>${article.title}</h3>
                     <p>${article.description}</p>
+                    <a href="${article.url}" target="_blank">Read more</a>
                 `;
                 newsContainer.appendChild(newsItem);
             });
