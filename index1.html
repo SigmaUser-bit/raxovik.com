@@ -316,8 +316,8 @@ footer a:hover {
             }
         });
          document.addEventListener("DOMContentLoaded", () => {
-            const apiKey = 'a67485b8339344c18e724da0d530af6d'; // Replace with your API key
-            const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+    const apiKey = '242d05952c4349041d5b979e18745845'; // Replace with your GNews API key
+    const url = `https://gnews.io/api/v4/top-headlines?country=us&lang=en&token=${apiKey}`;
 
     async function fetchNews() {
         try {
@@ -354,8 +354,8 @@ footer a:hover {
     // Initial fetch on page load
     fetchNews();
 
-    // Automatically refresh news every 6 hours (21,600,000 milliseconds)
-    setInterval(fetchNews, 21600000);
+    // Automatically refresh news every 12 hours (43,200,000 milliseconds)
+    setInterval(fetchNews, 43200000);
 });
     </script>
 </body>
