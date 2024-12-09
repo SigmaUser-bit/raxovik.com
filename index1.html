@@ -319,7 +319,7 @@ footer a:hover {
     const apiKey = 'ccc5f5ac34b4492f900f624984caaee9'; // Replace with your API key
     const proxyUrl = "https://cors-anywhere.herokuapp.com/";
     const apiUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
-    const url = proxyUrl + apiUrl;
+    const url = `https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/top-headlines?country=us&apiKey=ccc5f5ac34b4492f900f624984caaee9`;
 
     async function fetchNews() {
         try {
