@@ -315,53 +315,75 @@ footer a:hover {
                 console.error("Logout error:", error.message);
             }
         });
-         document.addEventListener("DOMContentLoaded", () => {
-    const apiKey = 'ccc5f5ac34b4492f900f624984caaee9'; // Replace with your API key
-    const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-    const apiUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
-    const url = `https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/top-headlines?country=us&apiKey=ccc5f5ac34b4492f900f624984caaee9`;
+        document.addEventListener("DOMContentLoaded", () => {
+        const apiKey1 = '242d05952c4349041d5b979e18745845'; // API 1 key
+        const apiKey2 = 'bbe72b15c2d5eeb4695f5b3cea0ab125'; // Replace with API 2 key
+        const apiKey3 = 'b933fefcfba6737a6fad3c1a7bf9a83c'; // Replace with API 3 key
 
-    async function fetchNews() {
-    try {
-        console.log('Fetching news...');
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Origin': 'http://sigmauser-bit.github.io/raxovik.com', // Replace with your actual GitHub Pages URL
-                'X-Requested-With': 'XMLHttpRequest'
+        const url1 = `https://gnews.io/api/v4/top-headlines?country=us&lang=en&token=${apiKey1}`;
+        const url2 = `https://gnews.io/api/v4/top-headlines?country=us&lang=en&token=${apiKey2}`; // Replace with actual URL for API 2
+        const url3 = `https://gnews.io/api/v4/top-headlines?country=us&lang=en&token=${apiKey3}`; // Replace with actual URL for API 3
+
+        async function fetchNews(url, apiKeyName) {
+            try {
+                console.log(`Fetching news from ${apiKeyName}...`);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 429) { // Rate limit error (HTTP 429)
+                        throw new Error('Rate limit reached');
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.articles && data.articles.length > 0) {
+                    return data.articles;
+                } else {
+                    throw new Error('No articles found');
+                }
+            } catch (error) {
+                console.error(`Error from ${apiKeyName}:`, error.message);
+                return null; // Return null to indicate an error
             }
-        });
+        }
 
-        const data = await response.json();
+        async function displayNews() {
+            let articles = await fetchNews(url1, 'API 1');
+            if (!articles) {
+                console.log('API 1 failed. Switching to API 2...');
+                articles = await fetchNews(url2, 'API 2');
+            }
+            if (!articles) {
+                console.log('API 2 failed. Switching to API 3...');
+                articles = await fetchNews(url3, 'API 3');
+            }
+            if (articles) {
+                renderNews(articles);
+            } else {
+                console.error('All APIs failed to fetch news.');
+                document.getElementById('news-container').innerHTML = '<p>Failed to load news. Please try again later.</p>';
+            }
+        }
 
-        if (data.status === 'ok' && data.articles.length > 0) {
+        function renderNews(articles) {
             const newsContainer = document.getElementById('news-container');
-            newsContainer.innerHTML = ''; // Clear any existing content
-
-            // Loop through articles and display them
-            data.articles.forEach(article => {
+            newsContainer.innerHTML = ''; // Clear existing content
+            articles.forEach(article => {
                 const newsItem = document.createElement('div');
-                newsItem.classList.add('news-item');
+                newsItem.className = 'news-item';
                 newsItem.innerHTML = `
                     <h3>${article.title}</h3>
-                    <p>${article.description || 'No description available.'}</p>
+                    <p>${article.description}</p>
                 `;
                 newsContainer.appendChild(newsItem);
             });
-        } else {
-            console.error('No news articles found or API request failed.');
         }
-    } catch (error) {
-        console.error('Error fetching news:', error);
-    }
-}
 
-    // Initial fetch on page load
-    fetchNews();
+        // Initial load of news on page load
+        displayNews();
 
-    // Automatically refresh news every 6 hours (21,600,000 milliseconds)
-    setInterval(fetchNews, 21600000);
-});
+        // Automatically refresh news every 6 hours (21,600,000 milliseconds)
+        setInterval(displayNews, 21600000);
+    });
     </script>
 </body>
 
