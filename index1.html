@@ -317,7 +317,9 @@ footer a:hover {
         });
         document.addEventListener("DOMContentLoaded", () => {
     const apiKey = 'a67485b8339344c18e724da0d530af6d'; // Replace with your API key
-    const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+    const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+    const apiUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+    const url = proxyUrl + apiUrl;
 
     async function fetchNews() {
         try {
@@ -352,7 +354,7 @@ footer a:hover {
 
     // Automatically refresh news every 3 hours (10,800,000 milliseconds)
     setInterval(fetchNews, 10800000);
-});      
+});    
     </script>
 </body>
 
