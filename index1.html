@@ -316,7 +316,7 @@ footer a:hover {
             }
         });
          document.addEventListener("DOMContentLoaded", () => {
-    const apiKey = 'a67485b8339344c18e724da0d530af6d'; // Replace with your API key
+    const apiKey = 'ccc5f5ac34b4492f900f624984caaee9'; // Replace with your API key
     const proxyUrl = "https://cors-anywhere.herokuapp.com/";
     const apiUrl = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
     const url = proxyUrl + apiUrl;
@@ -352,8 +352,8 @@ footer a:hover {
     // Initial fetch on page load
     fetchNews();
 
-    // Automatically refresh news every 3 hours (10,800,000 milliseconds)
-    setInterval(fetchNews, 10800000);
+    // Automatically refresh news every 6 hours (21,600,000 milliseconds)
+    setInterval(fetchNews, 21600000);
 });
     </script>
 </body>
