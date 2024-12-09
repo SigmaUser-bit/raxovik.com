@@ -322,32 +322,39 @@ footer a:hover {
     const url = `https://cors-anywhere.herokuapp.com/https://newsapi.org/v2/top-headlines?country=us&apiKey=ccc5f5ac34b4492f900f624984caaee9`;
 
     async function fetchNews() {
-        try {
-            console.log('Fetching news...');
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.status === 'ok' && data.articles.length > 0) {
-                const newsContainer = document.getElementById('news-container');
-                newsContainer.innerHTML = ''; // Clear any existing content
-
-                // Loop through articles and display them
-                data.articles.forEach(article => {
-                    const newsItem = document.createElement('div');
-                    newsItem.classList.add('news-item');
-                    newsItem.innerHTML = `
-                        <h3>${article.title}</h3>
-                        <p>${article.description || 'No description available.'}</p>
-                    `;
-                    newsContainer.appendChild(newsItem);
-                });
-            } else {
-                console.error('No news articles found or API request failed.');
+    try {
+        console.log('Fetching news...');
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Origin': 'http://sigmauser-bit.github.io/raxovik.com', // Replace with your actual GitHub Pages URL
+                'X-Requested-With': 'XMLHttpRequest'
             }
-        } catch (error) {
-            console.error('Error fetching news:', error);
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'ok' && data.articles.length > 0) {
+            const newsContainer = document.getElementById('news-container');
+            newsContainer.innerHTML = ''; // Clear any existing content
+
+            // Loop through articles and display them
+            data.articles.forEach(article => {
+                const newsItem = document.createElement('div');
+                newsItem.classList.add('news-item');
+                newsItem.innerHTML = `
+                    <h3>${article.title}</h3>
+                    <p>${article.description || 'No description available.'}</p>
+                `;
+                newsContainer.appendChild(newsItem);
+            });
+        } else {
+            console.error('No news articles found or API request failed.');
         }
+    } catch (error) {
+        console.error('Error fetching news:', error);
     }
+}
 
     // Initial fetch on page load
     fetchNews();
