@@ -250,33 +250,11 @@ footer a:hover {
         </div>
     </nav>
 
+    
     <section id="news">
         <h2>Latest News</h2>
-        <div class="news-container">
-            <div class="news-item">
-                <h3>News Title 1</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris fringilla eget.</p>
-            </div>
-            <div class="news-item">
-                <h3>News Title 2</h3>
-                <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin auctor erat non nisi vulputate.</p>
-            </div>
-            <div class="news-item">
-                <h3>News Title 3</h3>
-                <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
-            </div>
-             <div class="news-item">
-                <h3>News Title 4</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vehicula malesuada justo, at vestibulum mauris fringilla eget.</p>
-            </div>
-            <div class="news-item">
-                <h3>News Title 5</h3>
-                <p>Suspendisse commodo, nunc ut volutpat efficitur, erat ex ultricies libero, nec cursus ex libero ac ligula. Proin auctor erat non nisi vulputate.</p>
-            </div>
-            <div class="news-item">
-                <h3>News Title 6</h3>
-                <p>Curabitur vel eros a risus cursus mollis. Nulla facilisi. Aliquam erat volutpat. Suspendisse potenti.</p>
-            </div>
+        <div class="news-container" id="news-container">
+            <!-- News items will be dynamically added here -->
         </div>
     </section>
 
@@ -337,6 +315,44 @@ footer a:hover {
                 console.error("Logout error:", error.message);
             }
         });
+        document.addEventListener("DOMContentLoaded", () => {
+    const apiKey = 'a67485b8339344c18e724da0d530af6d'; // Replace with your API key
+    const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+
+    async function fetchNews() {
+        try {
+            console.log('Fetching news...');
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.status === 'ok' && data.articles.length > 0) {
+                const newsContainer = document.getElementById('news-container');
+                newsContainer.innerHTML = ''; // Clear any existing content
+
+                // Loop through articles and display them
+                data.articles.forEach(article => {
+                    const newsItem = document.createElement('div');
+                    newsItem.classList.add('news-item');
+                    newsItem.innerHTML = `
+                        <h3>${article.title}</h3>
+                        <p>${article.description || 'No description available.'}</p>
+                    `;
+                    newsContainer.appendChild(newsItem);
+                });
+            } else {
+                console.error('No news articles found or API request failed.');
+            }
+        } catch (error) {
+            console.error('Error fetching news:', error);
+        }
+    }
+
+    // Initial fetch on page load
+    fetchNews();
+
+    // Automatically refresh news every 6 hours (21,600,000 milliseconds)
+    setInterval(fetchNews, 21600000);
+});      
     </script>
 </body>
 
