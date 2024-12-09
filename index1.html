@@ -316,16 +316,22 @@ footer a:hover {
             }
         });
          document.addEventListener("DOMContentLoaded", () => {
-    const apiKey = 'a67485b8339344c18e724da0d530af6d'; // Replace with your API key
-    const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+            const apiKey = 'a67485b8339344c18e724da0d530af6d'; // Replace with your API key
+            const url = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`;
+
     async function fetchNews() {
         try {
             console.log('Fetching news...');
             const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
-            if (data.status === 'ok' && data.articles.length > 0) {
+
+            if (data.articles && data.articles.length > 0) {
                 const newsContainer = document.getElementById('news-container');
                 newsContainer.innerHTML = ''; // Clear any existing content
+
                 // Loop through articles and display them
                 data.articles.forEach(article => {
                     const newsItem = document.createElement('div');
@@ -333,6 +339,7 @@ footer a:hover {
                     newsItem.innerHTML = `
                         <h3>${article.title}</h3>
                         <p>${article.description || 'No description available.'}</p>
+                        <a href="${article.url}" target="_blank">Read more</a>
                     `;
                     newsContainer.appendChild(newsItem);
                 });
@@ -343,11 +350,13 @@ footer a:hover {
             console.error('Error fetching news:', error);
         }
     }
+
     // Initial fetch on page load
     fetchNews();
+
     // Automatically refresh news every 6 hours (21,600,000 milliseconds)
     setInterval(fetchNews, 21600000);
-}); 
+});
     </script>
 </body>
 
