@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Video Meeting App with Firebase Auth</title>
+  <style>
+    /* General Body Styling */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    /* Container for the join screen */
+    #join-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      margin-top: 20px;
+    }
+
+    /* Buttons */
+    button {
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin: 10px 0;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:focus {
+      outline: none;
+    }
+
+    /* Input fields */
+    #meetingIdTxt, #auth-email, #auth-password {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    /* Text container */
+    #textDiv {
+      margin: 20px 0;
+      font-size: 18px;
+      color: #333;
+      text-align: center;
+    }
+
+    /* Video container */
+    #videoContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    /* Individual video frame */
+    .video-frame {
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      overflow: hidden;
+      width: 300px;
+      background-color: #000;
+      position: relative;
+    }
+
+    /* Display name styling */
+    .video-frame div {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      text-align: center;
+      background-color: rgba(0, 123, 255, 0.7);
+      color: #ffffff;
+      padding: 5px;
+    }
+
+    /* Grid screen styling */
+    #grid-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 20px;
+    }
+
+    /* Controller buttons */
+    #grid-screen button {
+      width: 150px;
+      margin: 5px;
+      font-size: 14px;
+      background-color: #28a745;
+    }
+
+    #grid-screen button:hover {
+      background-color: #218838;
+    }
+
+    /* Heading for the meeting ID */
+    #meetingIdHeading {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #007bff;
+    }
+
+    /* Hide OR text */
+    #orText {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #555;
+    }
+
+    /* Authentication Modal Styling */
+    #auth-modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #auth-modal .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 350px;
+      position: relative;
+      text-align: center;
+    }
+
+    #auth-modal h2 {
+      margin-top: 0;
+      color: #007bff;
+    }
+
+    #auth-modal button {
+      background-color: #db4437; /* Google Red */
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 5px;
+      color: #ffffff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border: none;
+      margin-bottom: 10px;
+    }
+
+    #auth-modal button:hover {
+      background-color: #c33d2e;
+    }
+
+    #auth-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #aaa;
+    }
+
+    #auth-close:hover {
+      color: #000;
+    }
+
+    /* Logout Button Styling */
+    #logout-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background-color: #dc3545;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: none; /* Hidden by default */
+    }
+
+    #logout-btn:hover {
+      background-color: #c82333;
+    }
+
+    /* Google Icon Styling */
+    .google-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+
+    /* Additional Styling for Email/Password Forms */
+    .auth-form {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .auth-form.active {
+      display: flex;
+    }
+
+    .auth-form input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .auth-form button {
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin: 10px 0;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .auth-form button:hover {
+      background-color: #0056b3;
+    }
+
+    .auth-error {
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    /* Public Meetings List Styling */
+    #publicMeetingsList {
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    #publicMeetingsList h4 {
+      margin-bottom: 10px;
+      text-align: center;
+      color: #007bff;
+    }
+
+    .meetingItem {
+      background: #e9f2ff;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .meetingItem span {
+      color: #333;
+    }
+
+    .meetingItem code {
+      background: #fff;
+      padding: 2px 4px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Logout Button (Hidden by default) -->
+  <button id="logout-btn">Logout</button>
+
+  <!-- Authentication Modal -->
+  <div id="auth-modal">
+    <div class="modal-content">
+      <span id="auth-close">&times;</span>
+      <h2>Welcome</h2>
+
+      <!-- Google Sign-In Button -->
+      <button id="google-login-btn">
+        <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" class="google-icon">
+        Sign in with Google
+      </button>
+
+      <!-- Divider -->
+      <div>OR</div>
+
+      <!-- Email & Password Forms -->
+      <div class="auth-form active" id="login-form">
+        <input type="email" id="login-email" placeholder="Email" />
+        <input type="password" id="login-password" placeholder="Password" />
+        <button id="login-btn">Login</button>
+        <div class="auth-error" id="login-error"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Button to Open Auth Modal -->
+  <button id="open-auth-btn">Login</button>
+
+  <div id="join-screen" style="display: none;">
+    <!-- Webcam preview -->
+    <video id="lobbyWebcamPreview" autoplay playsinline muted style="width: 100%; border: 2px solid #ccc; border-radius: 8px; margin-bottom: 10px;"></video>
+
+    <!-- Meeting Visibility Selection -->
+    <label for="meetingType">Meeting Type:</label>
+    <select id="meetingType">
+      <option value="public">Public</option>
+      <option value="private">Private</option>
+    </select>
+
+    <!-- Create new Meeting Button -->
+    <button id="createMeetingBtn">New Meeting</button>
+    
+    <!-- OR Separator -->
+    <div id="orText">OR</div>
+    
+    <!-- Join existing Meeting -->
+    <input type="text" id="meetingIdTxt" placeholder="Enter Meeting ID" />
+    <button id="joinBtn">Join Meeting</button>
+
+    <!-- Public Meetings Available -->
+    <div id="publicMeetingsList" style="display:none;">
+      <h4>Available Public Meetings</h4>
+      <div id="publicMeetingsContainer"></div>
+    </div>
+  </div>
+  
+  <!-- For Managing meeting status -->
+  <div id="textDiv"></div>
+
+  <div id="grid-screen" style="display: none;">
+    <!-- To Display MeetingId -->
+    <h3 id="meetingIdHeading"></h3>
+
+    <!-- Controllers -->
+    <button id="leaveBtn">Leave</button>
+    <button id="toggleMicBtn">Mute Mic</button>
+    <button id="toggleWebCamBtn">Disable Webcam</button>
+
+    <!-- Render Video -->
+    <div class="row" id="videoContainer"></div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- Add VideoSDK script -->
+  <script src="https://sdk.videosdk.live/js-sdk/0.0.86/videosdk.js"></script>
+
+  <script>
+    // =======================
+    // Firebase Configuration
+    // =======================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTyvJdA8IMsCiQytN7ZiTL7OP4DMMlxQI",
+      authDomain: "signin-320c9.firebaseapp.com",
+      databaseURL: "https://signin-320c9-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "signin-320c9",
+      storageBucket: "signin-320c9.firebasestorage.app",
+      messagingSenderId: "1090838062436",
+      appId: "1:1090838062436:web:6ebc8c041c03cfc2a0c671",
+      measurementId: "G-ZGWWRJJ43Y"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // Reference for public meetings in DB
+    const publicMeetingsRef = db.ref('public_meetings');
+
+    // =======================
+    // Firebase Authentication
+    // =======================
+    const authModal = document.getElementById('auth-modal');
+    const openAuthBtn = document.getElementById('open-auth-btn');
+    const authClose = document.getElementById('auth-close');
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    
+    const loginForm = document.getElementById('login-form');
+    const loginBtn = document.getElementById('login-btn');
+    const loginError = document.getElementById('login-error');
+
+    const meetingTypeSelect = document.getElementById('meetingType');
+    const publicMeetingsList = document.getElementById('publicMeetingsList');
+    const publicMeetingsContainer = document.getElementById('publicMeetingsContainer');
+
+    let meetingType = "public"; // default
+
+    meetingTypeSelect.addEventListener("change", () => {
+      meetingType = meetingTypeSelect.value;
+    });
+
+    // Open Auth Modal
+    openAuthBtn.addEventListener('click', () => {
+      authModal.style.display = 'flex';
+    });
+    
+    // Close Auth Modal
+    authClose.addEventListener('click', () => {
+      authModal.style.display = 'none';
+    });
+    
+    // Handle Google Login
+    googleLoginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          // Successful login
+          authModal.style.display = 'none';
+        })
+        .catch((error) => {
+          console.error("Error during Google sign-in:", error);
+          alert("Google sign-in failed. Please try again.");
+        });
+    });
+    
+    // Handle Email & Password Login
+    loginBtn.addEventListener('click', () => {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      
+      if (email === '' || password === '') {
+        loginError.textContent = 'Please enter both email and password.';
+        return;
+      }
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Signed in
+          authModal.style.display = 'none';
+          // Clear form
+          document.getElementById('login-email').value = '';
+          document.getElementById('login-password').value = '';
+          loginError.textContent = '';
+        })
+        .catch((error) => {
+          console.error("Error during email login:", error);
+          loginError.textContent = error.message;
+        });
+    });
+    
+    // Handle Logout
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut()
+        .then(() => {
+          console.log("User signed out.");
+        })
+        .catch((error) => {
+          console.error("Error signing out:", error);
+          alert("Logout failed. Please try again.");
+        });
+    });
+    
+    // Listen to Auth State Changes
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("User signed in:", user.displayName || user.email);
+        openAuthBtn.style.display = 'none';
+        logoutBtn.style.display = 'block';
+        document.getElementById("join-screen").style.display = "flex";
+        document.getElementById("textDiv").textContent = `Welcome, ${user.displayName || user.email}! Please join or create a meeting.`;
+        startLobbyWebcamPreview();
+
+        // Listen to public meetings updates and display them
+        showPublicMeetings();
+      } else {
+        console.log("No user signed in.");
+        openAuthBtn.style.display = 'block';
+        logoutBtn.style.display = 'none';
+        document.getElementById("join-screen").style.display = "none";
+        document.getElementById("grid-screen").style.display = "none";
+        document.getElementById("textDiv").textContent = "";
+        stopLobbyWebcamPreview();
+      }
+    });
+
+    // =======================
+    // Video Meeting Functionality
+    // =======================
+    const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiJmODcxYTdmOC03NmNkLTQzMTQtOGI4Mi02YzdmODgzYjMwYTAiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTczMzU4OTUwNSwiZXhwIjoxNzY1MTI1NTA1fQ.75bxv6cxv88aNMRv52MoY_Z50PgWscNsiNEnHGNACHw"; // Replace with your actual VideoSDK token
+
+    const joinButton = document.getElementById("joinBtn");
+    const leaveButton = document.getElementById("leaveBtn");
+    const toggleMicButton = document.getElementById("toggleMicBtn");
+    const toggleWebCamButton = document.getElementById("toggleWebCamBtn");
+    const createButton = document.getElementById("createMeetingBtn");
+    const videoContainer = document.getElementById("videoContainer");
+    const textDiv = document.getElementById("textDiv");
+    const lobbyWebcamPreview = document.getElementById("lobbyWebcamPreview");
+
+    let meeting = null;
+    let meetingId = "";
+    let isMicOn = true;
+    let isWebCamOn = true;
+    let currentHostId = null; // to track if current user is the host of a meeting
+
+    // Webcam Preview Functions
+    function startLobbyWebcamPreview() {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          lobbyWebcamPreview.srcObject = stream;
+        })
+        .catch((error) => {
+          console.error("Error accessing webcam:", error);
+        });
+    }
+
+    function stopLobbyWebcamPreview() {
+      const stream = lobbyWebcamPreview.srcObject;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        lobbyWebcamPreview.srcObject = null;
+      }
+    }
+
+    // Initialize Meeting
+    function initializeMeeting() {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          alert('User not authenticated.');
+          return;
+        }
+
+        const username = user.displayName || user.email;
+        window.VideoSDK.config(TOKEN);
+
+        meeting = window.VideoSDK.initMeeting({
+          meetingId,
+          name: username,
+          micEnabled: true,
+          webcamEnabled: true,
+        });
+
+        if (!meeting) throw new Error("Failed to initialize the meeting.");
+
+        meeting.join();
+
+        createLocalParticipant();
+
+        meeting.localParticipant.on("stream-enabled", (stream) => {
+          setTrack(stream, null, meeting.localParticipant, true);
+        });
+
+        meeting.on("meeting-joined", () => {
+          console.log("Meeting joined successfully.");
+          textDiv.style.display = "none";
+          document.getElementById("grid-screen").style.display = "block";
+          document.getElementById("meetingIdHeading").textContent = `Meeting ID: ${meetingId}`;
+
+          // If host and public, write to database
+          // Assume creator is host. We can store host UID
+          if (meetingType === "public") {
+            const hostName = username;
+            currentHostId = user.uid;
+            publicMeetingsRef.child(meetingId).set({
+              meetingId: meetingId,
+              hostName: hostName,
+              hostUID: user.uid
+            });
+          } else {
+            currentHostId = user.uid; // host but private
+          }
+        });
+
+        meeting.on("meeting-left", () => {
+          console.log("Meeting left.");
+          videoContainer.innerHTML = "";
+        });
+
+        meeting.on("participant-joined", (participant) => {
+          console.log(`Participant joined: ${participant.displayName}`);
+          let videoElement = createVideoElement(participant.id, participant.displayName);
+          let audioElement = createAudioElement(participant.id);
+
+          participant.on("stream-enabled", (stream) => {
+            setTrack(stream, audioElement, participant, false);
+          });
+
+          videoContainer.appendChild(videoElement);
+          videoContainer.appendChild(audioElement);
+        });
+
+        meeting.on("participant-left", (participant) => {
+          console.log(`Participant left: ${participant.displayName}`);
+          document.getElementById(`f-${participant.id}`)?.remove();
+          document.getElementById(`a-${participant.id}`)?.remove();
+        });
+      } catch (error) {
+        console.error("Error initializing meeting:", error);
+        alert("Failed to initialize the meeting. Check the console for more details.");
+      }
+    }
+
+    // Create Video Element
+    function createVideoElement(pId, name) {
+      let videoFrame = document.createElement("div");
+      videoFrame.setAttribute("id", `f-${pId}`);
+      videoFrame.classList.add("video-frame");
+
+      let videoElement = document.createElement("video");
+      videoElement.setAttribute("id", `v-${pId}`);
+      videoElement.setAttribute("playsinline", true);
+      videoElement.setAttribute("width", "300");
+      videoElement.autoplay = true;
+      videoFrame.appendChild(videoElement);
+
+      let displayName = document.createElement("div");
+      displayName.textContent = `Name: ${name}`;
+      videoFrame.appendChild(displayName);
+
+      return videoFrame;
+    }
+
+    // Create Audio Element
+    function createAudioElement(pId) {
+      let audioElement = document.createElement("audio");
+      audioElement.setAttribute("autoplay", "true");
+      audioElement.setAttribute("playsinline", "true");
+      audioElement.setAttribute("controls", "false");
+      audioElement.setAttribute("id", `a-${pId}`);
+      audioElement.style.display = "none";
+      return audioElement;
+    }
+
+    // Create Local Participant
+    function createLocalParticipant() {
+      let localParticipant = createVideoElement(
+        meeting.localParticipant.id,
+        meeting.localParticipant.displayName
+      );
+      videoContainer.appendChild(localParticipant);
+    }
+
+    // Set Track
+    function setTrack(stream, audioElement, participant, isLocal) {
+      if (stream.kind === "video") {
+        isWebCamOn = true;
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(stream.track);
+        let videoElm = document.getElementById(`v-${participant.id}`);
+        if (videoElm) {
+          videoElm.srcObject = mediaStream;
+          videoElm.play().catch((error) =>
+            console.error("videoElm.play() failed", error)
+          );
+        }
+      } else if (stream.kind === "audio" && !isLocal) {
+        const mediaStream = new MediaStream();
+        mediaStream.addTrack(stream.track);
+        if (audioElement) {
+          audioElement.srcObject = mediaStream;
+          audioElement.play().catch((error) =>
+            console.error("audioElm.play() failed", error)
+          );
+        }
+      }
+    }
+
+    // Show Public Meetings from DB
+    function showPublicMeetings() {
+      // Clear existing
+      publicMeetingsContainer.innerHTML = "";
+
+      // Listen for added meetings
+      publicMeetingsRef.on('child_added', (snapshot) => {
+        const data = snapshot.val();
+        addMeetingToList(data);
+      });
+
+      // Listen for removed meetings
+      publicMeetingsRef.on('child_removed', (snapshot) => {
+        const data = snapshot.val();
+        removeMeetingFromList(data.meetingId);
+      });
+
+      publicMeetingsList.style.display = 'block';
+    }
+
+    function addMeetingToList(meetingData) {
+      const { meetingId, hostName } = meetingData;
+
+      const item = document.createElement("div");
+      item.classList.add("meetingItem");
+      item.setAttribute("id", `public-${meetingId}`);
+      item.innerHTML = `<span>Host: ${hostName} | Code: <code>${meetingId}</code></span> <button onclick="joinFromList('${meetingId}')">Join</button>`;
+      publicMeetingsContainer.appendChild(item);
+    }
+
+    function removeMeetingFromList(meetingId) {
+      const item = document.getElementById(`public-${meetingId}`);
+      if (item) {
+        item.remove();
+      }
+    }
+
+    // Join from public meeting list
+    function joinFromList(id) {
+      document.getElementById("meetingIdTxt").value = id;
+    }
+
+    // Event Listeners
+    joinButton.addEventListener("click", async () => {
+      const meetingInput = document.getElementById("meetingIdTxt").value.trim();
+      if (meetingInput === '') {
+        alert('Please enter a meeting ID.');
+        return;
+      }
+      stopLobbyWebcamPreview();
+      document.getElementById("join-screen").style.display = "none";
+      textDiv.textContent = "Joining the meeting...";
+      textDiv.style.display = "block";
+      meetingId = meetingInput;
+      initializeMeeting();
+    });
+
+    createButton.addEventListener("click", async () => {
+      stopLobbyWebcamPreview();
+      document.getElementById("join-screen").style.display = "none";
+      textDiv.textContent = "Please wait, we are creating and joining the meeting...";
+      textDiv.style.display = "block";
+  
+      try {
+        const url = `https://api.videosdk.live/v2/rooms`;
+        const options = {
+          method: "POST",
+          headers: { Authorization: TOKEN, "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        };
+    
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+        const data = await response.json();
+        const { roomId } = data;
+        meetingId = roomId;
+        
+        initializeMeeting();
+        
+        if (meetingType === "private") {
+          // For private meeting, just alert the host
+          alert(`Your private meeting ID: ${meetingId}\nShare this code with participants privately.`);
+        }
+
+      } catch (error) {
+        console.error("Error creating meeting:", error);
+        alert("Failed to create a meeting.");
+        document.getElementById("join-screen").style.display = "flex";
+        textDiv.textContent = "";
+        startLobbyWebcamPreview();
+      }
+    });
+
+    // Start Webcam Preview on Load if user is logged in
+    window.addEventListener('load', () => {
+      const user = auth.currentUser;
+      if (user) {
+        startLobbyWebcamPreview();
+      }
+    });
+
+    // Leave Meeting Button Event Listener
+    leaveButton.addEventListener("click", () => {
+      if (meeting) {
+        const user = auth.currentUser;
+        // If current user is host of a public meeting, remove from DB
+        if (meetingType === "public" && currentHostId === user.uid) {
+          publicMeetingsRef.child(meetingId).remove();
+        }
+
+        meeting.leave();
+        videoContainer.innerHTML = "";
+        meeting = null;
+        meetingId = "";
+
+        const lobbyStream = lobbyWebcamPreview.srcObject;
+        if (lobbyStream) {
+          lobbyStream.getTracks().forEach((track) => track.stop());
+        }
+        startLobbyWebcamPreview();
+        document.getElementById("grid-screen").style.display = "none";
+        document.getElementById("join-screen").style.display = "flex";
+        textDiv.textContent = "Welcome! Please join or create a meeting.";
+        textDiv.style.display = "block";
+      }
+    });
+
+    // Toggle Microphone
+    toggleMicButton.addEventListener("click", async () => {
+      if (meeting && meeting.localParticipant) {
+        try {
+          const micEnabled = meeting.localParticipant.isMicEnabled();
+          await meeting.localParticipant.setMicEnabled(!micEnabled);
+          isMicOn = !micEnabled;
+          toggleMicButton.textContent = isMicOn ? "Mute Mic" : "Unmute Mic";
+        } catch (error) {
+          console.error("Error toggling microphone:", error);
+          alert("Failed to toggle microphone.");
+        }
+      } else {
+        alert("Meeting not initialized. Please join or create a meeting first.");
+      }
+    });
+
+    // Toggle Webcam
+    toggleWebCamButton.addEventListener("click", async () => {
+      if (meeting && meeting.localParticipant) {
+        try {
+          const webcamEnabled = meeting.localParticipant.isWebcamEnabled();
+          await meeting.localParticipant.setWebcamEnabled(!webcamEnabled);
+          isWebCamOn = !webcamEnabled;
+          toggleWebCamButton.textContent = isWebCamOn ? "Disable Webcam" : "Enable Webcam";
+        } catch (error) {
+          console.error("Error toggling webcam:", error);
+          alert("Failed to toggle webcam.");
+        }
+      } else {
+        alert("Meeting not initialized. Please join or create a meeting first.");
+      }
+    });
+  </script>
+</body>
+</html>
